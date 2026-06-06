@@ -10,9 +10,12 @@ class ddboat_state():
         self.psi_rad = psi_rad0
         self.Ul = 0
         self.Ur = 0
-    
-    
+      
     def step(self, dt):
+        """
+        Used to update the boqt state using physics equations.
+        K and L are arbitrary, further research should be conducted to make the physics more realistic
+        """
         # modèle idéal : vitesse instantanée
         K = 0.05
         L = 0.25

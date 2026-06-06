@@ -1,24 +1,20 @@
-import threading
-
-from src.simulation import simulation
-from src.launcher import IHM_launcher
-from src.mapbuilder import mapbuilder
+from src.software_launcher import SOFTWARE_launcher
 
 
-
-def thread_manager(simu, wrapper):
-    t_wrapper = threading.Thread(target=wrapper.run, daemon=True)
-    t_wrapper.start()
-
-    simu.run()   # bloque ici → thread principal
+parameters = {
+    "dt": 0.05,
+    "nb_of_boats": 1,
+    "id_boat": 1,
+    "nb_of_waypoints": 3,
+    "nb_of_obstacles": 0,
+    "list_of_waypoints": None,
+    "list_of_obstacles": None,
+    }
 
 def main():
-    map_build = mapbuilder(nb_of_waypoints=3, nb_of_obstacles=0)
-    simu    = simulation(nb_of_boats=1, map_builder=map_build, dt=0.05)
-    ihm = IHM_launcher(map_builder = map_build,missions = simu.missions)
+    software = SOFTWARE_launcher(parameters)
+    software.mission_launcher()
 
-    thread_manager(simu, ihm)
-    
 
 if __name__ == "__main__":
     main()

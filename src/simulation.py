@@ -14,20 +14,25 @@ import matplotlib.patches as patches
 
 
 class simulation:
-    def __init__(self,nb_of_boats=1,map_builder=None,dt=0.05):
-        self.nb_boats = nb_of_boats
+    def __init__(self, parameters, map_builder=None):
+        self.nb_boats = parameters["nb_of_boats"]
         self.map_builder = map_builder
-        self.dt = dt
+        self.dt = parameters["dt"]
         self.initialization()
 
     def initialization(self):   
+        """
+        Creates all the attributes for the class.
+
+        the key of each dict represents the id of the boat, the value is the class instance for drivers state and missions..
+        """
         self.boats     = {}
         self.fake_ardu = {}
         self.fake_gps  = {}
         self.fake_imu  = {}
         self.missions  = {}
         for i in range (1,self.nb_boats+1):
-            self.boats[i]     = ddboat_state(id=str(i))
+            self.boats[i]     = ddboat_state(id=int(i))
             self.fake_ardu[i] = fake_boat_ardu(self.boats[i])
             self.fake_gps[i]  = fake_boat_gps(self.boats[i])
             self.fake_imu[i]  = fake_boat_imu(self.boats[i])
@@ -41,6 +46,9 @@ class simulation:
         self.setup_map_graphics()
 
     def setup_display_graphics(self):
+        """
+        sets up the window page for the simulation
+        """
         self.fig, self.ax = plt.subplots(figsize=(7, 7))
         self.ax.set_xlim(-100, 100)
         self.ax.set_ylim(-100, 100)
@@ -52,6 +60,9 @@ class simulation:
         self.fig.patch.set_facecolor('#0d1b2a')
 
     def setup_boats_graphics(self):
+        """
+        sets up the boat representation in the simulation
+        """
         # flèches représentant chaque bateau
         self.arrows = {}
         for i in range(1, self.nb_boats + 1):
@@ -75,6 +86,9 @@ class simulation:
                         labelcolor='white', fontsize=8)
 
     def setup_map_graphics(self):
+        """
+        sets up the different map elements on the simulation
+        """
         if self.map_builder is None:
             return
 
@@ -92,6 +106,9 @@ class simulation:
             self.obstacle_plots[i] = circle
 
     def run(self):
+        """
+        runs the matplotlib animation
+        """
         # animation matplotlib (thread principal)
         self.ani = animation.FuncAnimation(
             self.fig, self.update,
@@ -102,7 +119,10 @@ class simulation:
         plt.tight_layout()
         plt.show()
 
-    def update(self, frame):
+    def update(self,_): # matplotlib calls this function with a hidden argument frame number.
+        """
+        updates the graphics
+        """
         self.update_boats()
         self.update_map()
 
