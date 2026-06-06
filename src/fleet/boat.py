@@ -3,7 +3,7 @@ from src.hardware.fake_boat_drivers.fake_boat_driver_arduino import fake_boat_ar
 from src.hardware.fake_boat_drivers.fake_boat_driver_gps import fake_boat_gps
 from src.hardware.fake_boat_drivers.fake_boat_driver_imu import fake_boat_imu
 
-from src.user_scripts.src.missions import ddboat_mission
+from src.user_scripts.src.boat__master import boat_master
 
 
 class boat:
@@ -20,7 +20,7 @@ class boat:
         self.fake_gps  = fake_boat_gps(boat = self)
         self.fake_imu  = fake_boat_imu(boat = self)
         
-        self.do  = ddboat_mission(ardu = self.fake_ardu,gps = self.fake_gps,imu = self.fake_imu)
+        self.do  = boat_master(ardu = self.fake_ardu,gps = self.fake_gps,imu = self.fake_imu)
         
 
     
