@@ -1,10 +1,3 @@
-from src.physics import ddboat_state
-
-from fake_boat_drivers.fake_boat_driver_arduino import fake_boat_ardu
-from fake_boat_drivers.fake_boat_driver_gps import fake_boat_gps
-from fake_boat_drivers.fake_boat_driver_imu import fake_boat_imu
-
-from src.missions import ddboat_mission
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,33 +5,12 @@ import matplotlib.animation as animation
 import matplotlib.patches as patches
 
 
-
-class simulation:
-    def __init__(self, parameters, map_builder=None):
-        self.nb_boats = parameters["nb_of_boats"]
-        self.map_builder = map_builder
+class graphical_interface:
+    def __init__(self, parameters, fleet_manager = None, map_builder = None):
         self.dt = parameters["dt"]
-        self.initialization()
-
-    def initialization(self):   
-        """
-        Creates all the attributes for the class.
-
-        the key of each dict represents the id of the boat, the value is the class instance for drivers state and missions..
-        """
-        self.boats     = {}
-        self.fake_ardu = {}
-        self.fake_gps  = {}
-        self.fake_imu  = {}
-        self.missions  = {}
-        for i in range (1,self.nb_boats+1):
-            self.boats[i]     = ddboat_state(id=int(i))
-            self.fake_ardu[i] = fake_boat_ardu(self.boats[i])
-            self.fake_gps[i]  = fake_boat_gps(self.boats[i])
-            self.fake_imu[i]  = fake_boat_imu(self.boats[i])
-            self.missions[i]  = ddboat_mission(waypoint=self.map_builder.waypoint, ardu = self.fake_ardu[i],gps = self.fake_gps[i],imu = self.fake_imu[i])    
-
-        self.setup()  
+        self.fleet_manager = fleet_manager
+        self.map_builder = map_builder
+        self.setup()          
 
     def setup(self):
         self.setup_display_graphics()
@@ -53,7 +25,7 @@ class simulation:
         self.ax.set_xlim(-100, 100)
         self.ax.set_ylim(-100, 100)
         self.ax.set_aspect('equal')
-        self.ax.set_facecolor('#0d1b2a')
+        self.ax.set_facecolor("#afb6be")
         self.ax.set_title("DDBoat Simulation", color='white', fontsize=12, pad=10)
         self.ax.tick_params(colors='#aaaaaa')
         self.ax.grid(True, linestyle='--', alpha=0.2, color='white')
@@ -65,8 +37,8 @@ class simulation:
         """
         # flèches représentant chaque bateau
         self.arrows = {}
-        for i in range(1, self.nb_boats + 1):
-            b = self.boats[i]
+        for i in range(1, self.fleet_manager.nb_boats + 1):
+            b = self.fleet_manager.boat[i]
             self.arrows[i] = self.ax.annotate(
                 '',
                 xy=(b.x + np.cos(b.psi_rad) * 4, b.y + np.sin(b.psi_rad) * 4),
@@ -79,9 +51,9 @@ class simulation:
             )
 
         # légende
-        for i in range(1, self.nb_boats + 1):
+        for i in range(1, self.fleet_manager.nb_boats + 1):
             self.ax.plot([], [], color='#f5c518', label=f'Bateau {i}')
-        if self.nb_boats > 0:
+        if self.fleet_manager.nb_boats > 0:
             self.ax.legend(loc='upper right', facecolor='#1a2a3a',
                         labelcolor='white', fontsize=8)
 
@@ -127,8 +99,8 @@ class simulation:
         self.update_map()
 
     def update_boats(self):
-        for i in range(1, self.nb_boats + 1):
-            boat = self.boats[i]
+        for i in range(1, self.fleet_manager.nb_boats + 1):
+            boat = self.fleet_manager.boat[i]
             boat.step(self.dt)
 
             queue_fleche = (boat.x, boat.y)

@@ -3,11 +3,11 @@ import numpy as np
 
 
 class fake_boat_imu:
-    def __init__(self, ddboat_state):
+    def __init__(self, boat):
         """
         This is a fake IMU driver that simulates magnetometer readings based on the boat's heading (psi).
         """
-        self.boat = ddboat_state
+        self.boat = boat
 
     def read_mag_raw(self):
         """

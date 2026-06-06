@@ -7,8 +7,7 @@ import time
 
 
 class ddboat_mission:
-    def __init__(self, waypoint, ardu, gps, imu):
-        self.waypoint = waypoint
+    def __init__(self, ardu, gps, imu):
         self.ardu = ardu
         self.gps = gps
         self.imu = imu

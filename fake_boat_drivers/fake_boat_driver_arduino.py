@@ -1,13 +1,9 @@
-
-
-
-
 class fake_boat_ardu():
-    def __init__(self, ddboat_state):
+    def __init__(self, boat):
         """
         This class simulates the arduino motor driver. It takes the motor commands that would be sent to the arduino and updates the boat state accordingly. It serves as an intermediate between the navigation algorithms and the boat physics.
         """
-        self.boat = ddboat_state
+        self.boat = boat
         self.cmd_left = 0
         self.cmd_right = 0
         print('Init Arduino ...')

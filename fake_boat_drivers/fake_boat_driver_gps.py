@@ -9,11 +9,11 @@ METER_PER_DEG_LON = 111320.0 * np.cos(np.radians(LAT0))
 
 
 class fake_boat_gps():
-    def __init__(self,ddboat_state):
+    def __init__(self,boat):
         """
         This class simulates the gps sensor. It takes the boat state and converts the x y coordinates to latitude and longitude. It serves as an intermediate between the boat physics and the navigation algorithms that use GPS data.
         """
-        self.boat = ddboat_state
+        self.boat = boat
 
     def _to_nmea(self, deg):
         """
