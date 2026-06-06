@@ -21,11 +21,7 @@ class software:
         id = 1 # we only have one boat for now. This should be changed when we will have more boats.
         
         print(f"Bateau {id} → Début de la mission")
-        self.fleet_manager.boat[id].do.test()
+        self.fleet_manager.boat[id].do.go_to_waypoints()
         input("Appuie sur Entrée pour arrêter la simulation...")
         print("Arrêt de la simulation.")
         
-
-if __name__ == "__main__":
-    with open("src/user_scripts/config.json", "r") as f:
-        parameters = json.load(f)["parameters"]
