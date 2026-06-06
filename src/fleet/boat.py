@@ -1,9 +1,9 @@
 import numpy as np
-from fake_boat_drivers.fake_boat_driver_arduino import fake_boat_ardu
-from fake_boat_drivers.fake_boat_driver_gps import fake_boat_gps
-from fake_boat_drivers.fake_boat_driver_imu import fake_boat_imu
+from src.hardware.fake_boat_drivers.fake_boat_driver_arduino import fake_boat_ardu
+from src.hardware.fake_boat_drivers.fake_boat_driver_gps import fake_boat_gps
+from src.hardware.fake_boat_drivers.fake_boat_driver_imu import fake_boat_imu
 
-from src.missions import ddboat_mission
+from src.user_scripts.src.missions import ddboat_mission
 
 
 class boat:
@@ -15,7 +15,6 @@ class boat:
         self.Ul = 0
         self.Ur = 0
 
-        self.state = boat_state(x0, y0, psi_rad0)
 
         self.fake_ardu = fake_boat_ardu(boat = self)
         self.fake_gps  = fake_boat_gps(boat = self)

@@ -2,7 +2,7 @@
 ### For now, a simple script is efficient, a better architecture/factorization might be needed for more complex algorithms.
 
 import numpy as np
-from src.utils import *
+from src.user_scripts.utilities.utils import *
 import time
 
 

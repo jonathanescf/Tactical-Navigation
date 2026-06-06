@@ -1,4 +1,4 @@
-from src.boat import boat
+from src.fleet.boat import boat
 
 
 

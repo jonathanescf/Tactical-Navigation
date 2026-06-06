@@ -25,7 +25,7 @@ class graphical_interface:
         self.ax.set_xlim(-100, 100)
         self.ax.set_ylim(-100, 100)
         self.ax.set_aspect('equal')
-        self.ax.set_facecolor("#afb6be")
+        self.ax.set_facecolor("#22272c")
         self.ax.set_title("DDBoat Simulation", color='white', fontsize=12, pad=10)
         self.ax.tick_params(colors='#aaaaaa')
         self.ax.grid(True, linestyle='--', alpha=0.2, color='white')
