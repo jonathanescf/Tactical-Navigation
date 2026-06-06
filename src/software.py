@@ -28,15 +28,15 @@ class software:
     def launch(self):
         input("Appuie sur Entrée pour tester les moteurs...")
         
-        for i in range(1, self.fleet_manager.nb_boats + 1):
-            self.thread_fleet_dict[i] = threading.Thread(target=self.fleet_manager.boat[i].do.go_to_waypoints, daemon=True)
+        for i in range(1, self.fleet_manager.nb_USVs + 1):
+            self.thread_fleet_dict[i] = threading.Thread(target=self.fleet_manager.USV[i].do.go_to_waypoints, daemon=True)
             self.thread_fleet_dict[i].start()
-            time.sleep(6)        
+            time.sleep(6.5)        
     
     #TODO: should stop every thread with a stop event.
     # def stop(self): 
     #     print("Arrêt de la simulation.")
-    #     for i in range(1, self.fleet_manager.nb_boats + 1):
-    #         self.fleet_manager.boat[i].do.running = False
+    #     for i in range(1, self.fleet_manager.nb_USVs + 1):
+    #         self.fleet_manager.USV[i].do.running = False
 
         

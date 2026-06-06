@@ -1,12 +1,12 @@
 import numpy as np
-from src.hardware.fake_boat_drivers.fake_boat_driver_arduino import fake_boat_ardu
-from src.hardware.fake_boat_drivers.fake_boat_driver_gps import fake_boat_gps
-from src.hardware.fake_boat_drivers.fake_boat_driver_imu import fake_boat_imu
+from src.hardware.fake_USV_drivers.fake_USV_driver_arduino import fake_USV_ardu
+from src.hardware.fake_USV_drivers.fake_USV_driver_gps import fake_USV_gps
+from src.hardware.fake_USV_drivers.fake_USV_driver_imu import fake_USV_imu
 
-from src.user_scripts.src.boat__master import boat_master
+from src.user_scripts.src.USV__master import USV_master
 
 
-class boat:
+class USV:
     def __init__(self, id, x0 = 0, y0 = 0, psi_rad0 = 0):
         self.id = id
         self.x = x0
@@ -16,17 +16,17 @@ class boat:
         self.Ur = 0
 
 
-        self.fake_ardu = fake_boat_ardu(boat = self)
-        self.fake_gps  = fake_boat_gps(boat = self)
-        self.fake_imu  = fake_boat_imu(boat = self)
+        self.fake_ardu = fake_USV_ardu(USV = self)
+        self.fake_gps  = fake_USV_gps(USV = self)
+        self.fake_imu  = fake_USV_imu(USV = self)
         
-        self.do  = boat_master(ardu = self.fake_ardu,gps = self.fake_gps,imu = self.fake_imu)
+        self.do  = USV_master(ardu = self.fake_ardu,gps = self.fake_gps,imu = self.fake_imu)
         
 
     
     def step(self, dt):
         """
-        Used to update the boat state using physics equations.
+        Used to update the USV state using physics equations.
         K and L are arbitrary, further research should be conducted to make the physics more realistic
         """
         # modèle idéal : vitesse instantanée

@@ -1,9 +1,9 @@
-class fake_boat_ardu():
-    def __init__(self, boat):
+class fake_USV_ardu():
+    def __init__(self, USV):
         """
-        This class simulates the arduino motor driver. It takes the motor commands that would be sent to the arduino and updates the boat state accordingly. It serves as an intermediate between the navigation algorithms and the boat physics.
+        This class simulates the arduino motor driver. It takes the motor commands that would be sent to the arduino and updates the USV state accordingly. It serves as an intermediate between the navigation algorithms and the USV physics.
         """
-        self.boat = boat
+        self.USV = USV
         self.cmd_left = 0
         self.cmd_right = 0
         print('Init Arduino ...')
@@ -21,12 +21,12 @@ class fake_boat_ardu():
     
     def send_arduino_cmd_motor(self,cmdl0,cmdr0):    
         """
-        sends the motor commands to the fake driver class to then simulate the boat movements.
+        sends the motor commands to the fake driver class to then simulate the USV movements.
         """
         self.cmd_left = self.bound_cmd(cmdl0)
         self.cmd_right = self.bound_cmd(cmdr0)
-        self.boat.Ul = self.cmd_left
-        self.boat.Ur = self.cmd_right
+        self.USV.Ul = self.cmd_left
+        self.USV.Ur = self.cmd_right
 
     def get_arduino_cmd_motor(self):
         """

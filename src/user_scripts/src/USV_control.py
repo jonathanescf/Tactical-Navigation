@@ -1,7 +1,7 @@
 import numpy as np
 from src.user_scripts.utilities.utils import *
 
-class boat_control:
+class USV_control:
     def control_law(self, v_desired,delta_w):
         """ 
         Compute the command voltages for the left and right motors 

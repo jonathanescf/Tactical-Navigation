@@ -8,12 +8,12 @@ METER_PER_DEG_LAT = 111320.0
 METER_PER_DEG_LON = 111320.0 * np.cos(np.radians(LAT0))
 
 
-class fake_boat_gps():
-    def __init__(self,boat):
+class fake_USV_gps():
+    def __init__(self,USV):
         """
-        This class simulates the gps sensor. It takes the boat state and converts the x y coordinates to latitude and longitude. It serves as an intermediate between the boat physics and the navigation algorithms that use GPS data.
+        This class simulates the gps sensor. It takes the USV state and converts the x y coordinates to latitude and longitude. It serves as an intermediate between the USV physics and the navigation algorithms that use GPS data.
         """
-        self.boat = boat
+        self.USV = USV
 
     def _to_nmea(self, deg):
         """
@@ -27,8 +27,8 @@ class fake_boat_gps():
         """
         this function simulates the reading of the GPS data in NMEA format. Returns the latitude and longitude in NMEA format. The bool depicts the quality of the message, which is always good in this simulation. The altitude is set to 0.0 for now.
         """
-        lat = LAT0 + self.boat.y / METER_PER_DEG_LAT
-        lon = LON0 + self.boat.x / METER_PER_DEG_LON
+        lat = LAT0 + self.USV.y / METER_PER_DEG_LAT
+        lon = LON0 + self.USV.x / METER_PER_DEG_LON
         lat_nmea = self._to_nmea(lat)
         lon_nmea = self._to_nmea(abs(lon))
         hemi_lat = 'N' if lat >= 0 else 'S'

@@ -6,12 +6,12 @@
 import numpy as np
 from src.user_scripts.utilities.utils import *
 
-from src.user_scripts.src.boat_algorithms import boat_algorithms
-from src.user_scripts.src.boat_control import boat_control
-from src.user_scripts.src.boat_sensors import boat_sensors
+from src.user_scripts.src.USV_algorithms import USV_algorithms
+from src.user_scripts.src.USV_control import USV_control
+from src.user_scripts.src.USV_sensors import USV_sensors
 
 
-class boat_master(boat_algorithms, boat_control, boat_sensors):
+class USV_master(USV_algorithms, USV_control, USV_sensors):
     def __init__(self, ardu, gps, imu):
         self.ardu = ardu
         self.gps = gps
@@ -25,7 +25,7 @@ class boat_master(boat_algorithms, boat_control, boat_sensors):
         self.running = True
         Ul = 255
         Ur = 255
-        print("Is the boat moving foward ?")
+        print("Is the USV moving foward ?")
         self.ardu.send_arduino_cmd_motor(Ul, Ur)
 
          

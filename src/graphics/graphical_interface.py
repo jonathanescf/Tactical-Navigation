@@ -14,7 +14,7 @@ class graphical_interface:
 
     def setup(self):
         self.setup_display_graphics()
-        self.setup_boats_graphics()
+        self.setup_USVs_graphics()
         self.setup_map_graphics()
 
     def setup_display_graphics(self):
@@ -31,14 +31,14 @@ class graphical_interface:
         self.ax.grid(True, linestyle='--', alpha=0.2, color='white')
         self.fig.patch.set_facecolor('#0d1b2a')
 
-    def setup_boats_graphics(self):
+    def setup_USVs_graphics(self):
         """
-        sets up the boat representation in the simulation
+        sets up the USV representation in the simulation
         """
         # flèches représentant chaque bateau
         self.arrows = {}
-        for i in range(1, self.fleet_manager.nb_boats + 1):
-            b = self.fleet_manager.boat[i]
+        for i in range(1, self.fleet_manager.nb_USVs + 1):
+            b = self.fleet_manager.USV[i]
             self.arrows[i] = self.ax.annotate(
                 '',
                 xy=(b.x + np.cos(b.psi_rad) * 4, b.y + np.sin(b.psi_rad) * 4),
@@ -51,9 +51,9 @@ class graphical_interface:
             )
 
         # légende
-        for i in range(1, self.fleet_manager.nb_boats + 1):
+        for i in range(1, self.fleet_manager.nb_USVs + 1):
             self.ax.plot([], [], color='#f5c518', label=f'Bateau {i}')
-        if self.fleet_manager.nb_boats > 0:
+        if self.fleet_manager.nb_USVs > 0:
             self.ax.legend(loc='upper right', facecolor='#1a2a3a',
                         labelcolor='white', fontsize=8)
 
@@ -95,16 +95,16 @@ class graphical_interface:
         """
         updates the graphics
         """
-        self.update_boats()
+        self.update_USVs()
         self.update_map()
 
-    def update_boats(self):
-        for i in range(1, self.fleet_manager.nb_boats + 1):
-            boat = self.fleet_manager.boat[i]
-            boat.step(self.dt)
+    def update_USVs(self):
+        for i in range(1, self.fleet_manager.nb_USVs + 1):
+            USV = self.fleet_manager.USV[i]
+            USV.step(self.dt)
 
-            queue_fleche = (boat.x, boat.y)
-            pointe = (boat.x + np.cos(boat.psi_rad) * 4, boat.y + np.sin(boat.psi_rad) * 4)
+            queue_fleche = (USV.x, USV.y)
+            pointe = (USV.x + np.cos(USV.psi_rad) * 4, USV.y + np.sin(USV.psi_rad) * 4)
             self.arrows[i].set_position(queue_fleche)
             self.arrows[i].xy = pointe
 

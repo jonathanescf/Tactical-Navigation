@@ -1,5 +1,5 @@
 import numpy as np
-from src.hardware.fake_boat_drivers.fake_boat_driver_gps import LAT0, LON0, METER_PER_DEG_LAT, METER_PER_DEG_LON
+from src.hardware.fake_USV_drivers.fake_USV_driver_gps import LAT0, LON0, METER_PER_DEG_LAT, METER_PER_DEG_LON
 
 def sawtooth(x):
     """

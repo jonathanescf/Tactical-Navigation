@@ -2,10 +2,10 @@ import numpy as np
 from src.user_scripts.utilities.utils import *
 
 
-class boat_sensors:
+class USV_sensors:
     def current_heading(self):
         """
-        Function to get the heading of the boat using the magnetometer of the IMU. The unit is in radians.
+        Function to get the heading of the USV using the magnetometer of the IMU. The unit is in radians.
         """
         mag = self.imu.read_mag_raw()
         return -np.arctan2(mag[1], mag[0])
@@ -22,7 +22,7 @@ class boat_sensors:
         
     def current_lat_lon_position(self):
         """
-        Function to get the current latitude and longitude of the boat using the GPS. 
+        Function to get the current latitude and longitude of the USV using the GPS. 
         The unit is in decimal degrees. 
         """
         msg, val = self.gps.read_gll_non_blocking()

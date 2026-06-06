@@ -3,10 +3,10 @@ import numpy as np
 from src.user_scripts.utilities.utils import *
 from src.user_scripts.config import parameters
 
-class boat_algorithms:
+class USV_algorithms:
     def cap_to(self, psi_desired_deg, v_desired = 255):
         """
-        Sets the boat to a certain heading
+        Sets the USV to a certain heading
         """
         self.running = True
         while self.running:
@@ -15,7 +15,7 @@ class boat_algorithms:
 
     def go_to_waypoints(self,dict_waypoints=False,order=False):
         """
-        The boat follows different waypoints from a dict.
+        The USV follows different waypoints from a dict.
         """
         self.running = True
 
