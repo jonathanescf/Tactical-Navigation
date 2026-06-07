@@ -22,3 +22,9 @@ def latlon_to_xy(lat, lon):
     x = (lon - LON0) * METER_PER_DEG_LON
     y = (lat - LAT0) * METER_PER_DEG_LAT
     return x, y
+
+def vector_to_heading(vector:np.array):
+    """
+    Function to convert a vector to a heading in radians.
+    """
+    return np.arctan2(vector[1], vector[0])

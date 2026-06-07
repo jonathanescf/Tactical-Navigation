@@ -22,8 +22,8 @@ class graphical_interface:
         sets up the window page for the simulation
         """
         self.fig, self.ax = plt.subplots(figsize=(7, 7))
-        self.ax.set_xlim(-300, 300)
-        self.ax.set_ylim(-300, 300)
+        self.ax.set_xlim(-100,100)
+        self.ax.set_ylim(-100,100)
         self.ax.set_aspect('equal')
         self.ax.set_facecolor("#22272c")
         self.ax.set_title("DDBoat Simulation", color='white', fontsize=12, pad=10)
