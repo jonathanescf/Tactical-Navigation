@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 def vector_field(x_USV, y_USV, x_target, y_target, dict_obstacles=parameters["dict_of_obstacles"]):
         k_attractive = 1
         k_repulsive = 1
-        k_obstacle_influence = 2 # gain multiplied by the radius to have the surface in which the robot will be repulsed by the obstacle
+        k_obstacle_influence = 3 # gain multiplied by the radius to have the surface in which the robot will be repulsed by the obstacle
 
         
         U_attractive = 0.5 * k_attractive * ((x_USV - x_target)**2 +(y_USV - y_target)**2) # we do pos - target because the potential vectors should point outwards from the target and have a positive value, that way when doing F = minus the gradient of U, we get a force that points towards the target.
@@ -23,17 +23,29 @@ def vector_field(x_USV, y_USV, x_target, y_target, dict_obstacles=parameters["di
             d = np.sqrt((x_USV - x_obs)**2 + (y_USV - y_obs)**2) 
             d0 = k_obstacle_influence * r_obs # The obstacle influence is two times its size, this is can be changed to optimize the algorithm.
             if d < d0:
+
+                ###* First Potential attempt: Using potentials found on articles
                 U_repulsive[i] = 0.5 * k_repulsive * (1/d - 1/d0)**2 * d0**4 # the last term d0 ** 4 is to make both attrctive terms and repulsive terms equivalent to d. ( Otherwise, the order of magnitude is not the same at all)
    
                 #* We use the chain rule here (Document the math in the README)
                 diff_x = x_USV - x_obs
                 diff_y = y_USV - y_obs
                 d_hat = np.array([diff_x, diff_y])  / d # direction of the repulsive force
-
                 F_repuls_x = k_repulsive * (1/d - 1/d0) * (1/d**2) * d_hat[0] *d0**4  # the last term d0 ** 4 is to make both attrctive terms and repulsive terms equivalent to d. ( Otherwise, the order of magnitude is not the same at all)
                 F_repuls_y = k_repulsive * (1/d - 1/d0) * (1/d**2) * d_hat[1] *d0**4  # the last term d0 ** 4 is to make both attrctive terms and repulsive terms equivalent to d. ( Otherwise, the order of magnitude is not the same at all)
-
                 F_repulsive[i] = np.array([F_repuls_x, F_repuls_y])
+
+                ###* Second attempt: choosing my own potentials
+                
+                # U_repulsive[i] = (d0 - d) / (d - r_obs)**2
+
+                # diff_x = x_USV - x_obs
+                # diff_y = y_USV - y_obs
+                # d_hat = np.array([diff_x, diff_y]) / d
+
+                # dU_dd = (d - 2*d0 + r_obs) / (d - r_obs)**3
+                # F_repulsive[i] = -k_repulsive * dU_dd * d_hat
+                
 
             else:
                U_repulsive[i] = 0
@@ -42,7 +54,7 @@ def vector_field(x_USV, y_USV, x_target, y_target, dict_obstacles=parameters["di
         U_total = U_attractive + sum(U_repulsive.values())
         F_total = np.array([F_attractive[0] + sum(F_repulsive[i][0] for i in F_repulsive), F_attractive[1] + sum(F_repulsive[i][1] for i in F_repulsive)])
 
-        return F_total, k_obstacle_influence # 2nd argument for plotting purposes
+        return F_total, U_repulsive, k_obstacle_influence # 2nd argument for plotting purposes
 
 
 class USV_algorithms:
@@ -80,7 +92,7 @@ class USV_algorithms:
                     # # Go to waypoints without waypoints 
                     # desired_heading = np.arctan2(y_target - y_USV, x_target - x_USV)
                     
-                    vector_field_output, _ = vector_field(x_USV = x_USV, y_USV = y_USV, x_target = x_target, y_target = y_target)
+                    vector_field_output, _, _ = vector_field(x_USV = x_USV, y_USV = y_USV, x_target = x_target, y_target = y_target)
                     desired_heading = vector_to_heading(vector_field_output)
 
                     desired_speed = 255 * np.tanh(dist)

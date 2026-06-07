@@ -32,7 +32,7 @@ class USV:
         # modèle idéal : vitesse instantanée
         K = 0.05
         L = 0.25
-        v     = K * (self.Ul + self.Ur) / 2
+        v     = 2 * K * (self.Ul + self.Ur) / 2
         omega = K * (self.Ur - self.Ul) / (2 * L)
         self.x   += v * np.cos(self.psi_rad) * dt
         self.y   += v * np.sin(self.psi_rad) * dt
