@@ -25,7 +25,7 @@ class USV_sensors:
         Function to get the current latitude and longitude of the USV using the GPS. 
         The unit is in decimal degrees. 
         """
-        msg, val = self.gps.read_gll_non_blocking()
+        msg, val = self.gps.read_gll_non_busv_locking()
         if msg:
             lat = nmea_to_decimal(val[0])   
             lon = nmea_to_decimal(val[2])
@@ -39,10 +39,11 @@ class USV_sensors:
         Conversion function to getx,y coordinates from latitude and longitude. The unit is in meters. 
         The origin (0,0) is found in he latlon_to_xy function in utils.py.
         """
+        print("getting lat lon USV position...")
         lat, lon = self.current_lat_lon_position()
+        print("getting x,y fron lat lon...")
         if lat is not None and lon is not None:
             x, y = latlon_to_xy(lat, lon)
         else:
             x, y = None, None
         return x, y
-   

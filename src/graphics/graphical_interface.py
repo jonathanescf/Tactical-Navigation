@@ -38,11 +38,12 @@ class graphical_interface:
         # flèches représentant chaque bateau
         self.arrows = {}
         for i in range(1, self.fleet_manager.nb_USVs + 1):
-            b = self.fleet_manager.USV[i]
+            USV = self.fleet_manager.USV[i]
+            x, y, psi_rad = USV.x, USV.y, USV.psi_rad
             self.arrows[i] = self.ax.annotate(
                 '',
-                xy=(b.x + np.cos(b.psi_rad) * 4, b.y + np.sin(b.psi_rad) * 4),
-                xytext=(b.x, b.y),
+                xy=(x + np.cos(psi_rad) * 4, y + np.sin(psi_rad) * 4),
+                xytext=(x,y),
                 arrowprops=dict(
                     arrowstyle='->', color='#f5c518',
                     lw=2.5,
@@ -101,10 +102,12 @@ class graphical_interface:
     def update_USVs(self):
         for i in range(1, self.fleet_manager.nb_USVs + 1):
             USV = self.fleet_manager.USV[i]
-            USV.step(self.dt)
+        #     USV.physic_step(self.dt)
 
-            queue_fleche = (USV.x, USV.y)
-            pointe = (USV.x + np.cos(USV.psi_rad) * 4, USV.y + np.sin(USV.psi_rad) * 4)
+            x, y, psi_rad = USV.x, USV.y, USV.psi_rad
+
+            queue_fleche = (x, y)
+            pointe = (x + np.cos(psi_rad) * 4, y + np.sin(psi_rad) * 4)
             self.arrows[i].set_position(queue_fleche)
             self.arrows[i].xy = pointe
 

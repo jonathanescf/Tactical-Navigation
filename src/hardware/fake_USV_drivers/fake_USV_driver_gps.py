@@ -23,12 +23,17 @@ class fake_USV_gps():
         m = (abs(deg) - d) * 60
         return d * 100 + m
     
-    def read_gll_non_blocking(self):
+    def read_gll_non_busv_locking(self):
         """
         this function simulates the reading of the GPS data in NMEA format. Returns the latitude and longitude in NMEA format. The bool depicts the quality of the message, which is always good in this simulation. The altitude is set to 0.0 for now.
         """
-        lat = LAT0 + self.USV.y / METER_PER_DEG_LAT
-        lon = LON0 + self.USV.x / METER_PER_DEG_LON
+        print("asking for the usv_lock in gll...")
+        with self.USV.usv_lock:                          
+            x, y = self.USV._x, self.USV._y
+        print("getting out of the usv_lock")
+
+        lat = LAT0 + y / METER_PER_DEG_LAT
+        lon = LON0 + x / METER_PER_DEG_LON
         lat_nmea = self._to_nmea(lat)
         lon_nmea = self._to_nmea(abs(lon))
         hemi_lat = 'N' if lat >= 0 else 'S'

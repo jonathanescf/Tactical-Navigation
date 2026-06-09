@@ -32,8 +32,9 @@ class USV_algos_for_motion_planning:
         F_dict["target"] = np.array([-k_attractive * (x_USV - x_target), -k_attractive * (y_USV - y_target)])
         
         if np.sqrt((x_USV-x_target)**2+(y_USV-y_target)**2) < 20:
-            F_dict["target"] *= 10
-        
+            F_dict["target"] *= 100 * 1 / (np.sqrt((x_USV-x_target)**2+(y_USV-y_target)**2))
+
+
         for i, (x_obs, y_obs, r_obs) in dict_obstacles.items():
             
             d = np.sqrt((x_USV - x_obs)**2 + (y_USV - y_obs)**2) 
