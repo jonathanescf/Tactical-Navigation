@@ -9,7 +9,7 @@ from src.user_scripts.src.USV__master import USV_master
 
 
 class USV:
-    def __init__(self, id, x0 = 0, y0 = 0, psi_rad0 = 0):
+    def __init__(self, id:int, x0:float = 0, y0:float = 0, psi_rad0:float = 0):
 
         self.usv_lock = threading.Lock()
 
@@ -76,7 +76,7 @@ class USV:
         with self.usv_lock:
             self._Ur = value
 
-    def physic_step(self, dt):
+    def physic_step(self, dt:float):
         """
         Used to update the USV state using physics equations.
         K and L are arbitrary, further research should be conducted to make the physics more realistic

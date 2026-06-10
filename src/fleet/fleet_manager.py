@@ -3,7 +3,7 @@ from src.fleet.USV import USV
 
 
 class fleet_manager:
-    def __init__(self, parameters):
+    def __init__(self, parameters:dict):
         self.nb_USVs = parameters["nb_of_USVs"]
         self.initialization()
         

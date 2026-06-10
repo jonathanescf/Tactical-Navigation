@@ -3,7 +3,7 @@ from src.user_scripts.utilities.utils import *
 
 
 class USV_sensors:
-    def current_heading(self):
+    def current_heading(self)->float:
         """
         Function to get the heading of the USV using the magnetometer of the IMU. The unit is in radians.
         """
@@ -11,7 +11,7 @@ class USV_sensors:
         return -np.arctan2(mag[1], mag[0])
     
     #TODO: Implémentez un filtre de kalman sur l'imu et le gps pour estimer la vitesse du bateau
-    def current_speed(self):
+    def current_speed(self)->float:
         """
         The speed is taken from the motor command, K is given to have an exact estimate. This is ideal and should be changed.
         """
@@ -20,7 +20,7 @@ class USV_sensors:
         v     = K * (Ul + Ur) / 2
         return v
         
-    def current_lat_lon_position(self):
+    def current_lat_lon_position(self)->tuple[float,float]:
         """
         Function to get the current latitude and longitude of the USV using the GPS. 
         The unit is in decimal degrees. 
@@ -34,7 +34,7 @@ class USV_sensors:
             return lat, lon
         return None, None
         
-    def current_x_y_position(self):
+    def current_x_y_position(self)->tuple[float,float]:
         """
         Conversion function to getx,y coordinates from latitude and longitude. The unit is in meters. 
         The origin (0,0) is found in he latlon_to_xy function in utils.py.

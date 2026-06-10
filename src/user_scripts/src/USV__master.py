@@ -9,15 +9,19 @@ from src.user_scripts.src.USV_algos_for_motion_planning import USV_algos_for_mot
 from src.user_scripts.src.USV_control import USV_control
 from src.user_scripts.src.USV_sensors import USV_sensors
 
+from src.hardware.fake_USV_drivers.fake_USV_driver_arduino import fake_USV_ardu
+from src.hardware.fake_USV_drivers.fake_USV_driver_gps import fake_USV_gps
+from src.hardware.fake_USV_drivers.fake_USV_driver_imu import fake_USV_imu
+
 
 class USV_master(USV_algos_for_motion_planning, USV_control, USV_sensors):
-    def __init__(self, ardu, gps, imu):
+    def __init__(self, ardu:fake_USV_ardu, gps:fake_USV_gps, imu:fake_USV_imu):
         self.ardu = ardu
         self.gps = gps
         self.imu = imu
         self.running = False
 
-    def test(self):
+    def test(self)->None:
         """
         Simple test function to test if the USV moves in the simulation
         """
@@ -27,7 +31,7 @@ class USV_master(USV_algos_for_motion_planning, USV_control, USV_sensors):
         print("Is the USV moving foward ?")
         self.ardu.send_arduino_cmd_motor(Ul, Ur)
     
-    def go_to_target(self,x_target, y_target):
+    def go_to_target(self,x_target:float, y_target:float)->None:
         
         self.running = True
         
@@ -55,7 +59,7 @@ class USV_master(USV_algos_for_motion_planning, USV_control, USV_sensors):
                     self.ardu.send_arduino_cmd_motor(0, 0)  
                     break
          
-    def go_to_waypoints(self, dict_waypoints=False):
+    def go_to_waypoints(self, dict_waypoints:dict=False)->None:
         self.running = True
 
         if not dict_waypoints:

@@ -1,4 +1,6 @@
 
+from src.fleet.fleet_manager import fleet_manager
+from src.map.mapbuilder import mapbuilder
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -6,7 +8,7 @@ import matplotlib.patches as patches
 
 
 class graphical_interface:
-    def __init__(self, parameters, fleet_manager = None, map_builder = None):
+    def __init__(self, parameters:dict, fleet_manager:fleet_manager = None, map_builder:mapbuilder = None):
         self.dt = parameters["dt"]
         self.fleet_manager = fleet_manager
         self.map_builder = map_builder

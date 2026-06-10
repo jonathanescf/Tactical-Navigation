@@ -2,7 +2,7 @@ import numpy as np
 from src.user_scripts.utilities.utils import *
 
 class USV_control:
-    def control_law(self, v_desired,delta_w):
+    def control_law(self, v_desired:float,delta_w:float)->tuple[float,float]:
         """ 
         Compute the command voltages for the left and right motors 
         based on the desired linear velocity (v_desired) and angular velocity delta_w) using a feed-forward control approach. 
@@ -13,7 +13,7 @@ class USV_control:
 
         return Ur, Ul
     
-    def control_step(self, v_desired, psi_desired_rad):
+    def control_step(self, v_desired:float, psi_desired_rad:float)->None:
         """
         For each physic_step, this function computes a command and comunnicates it to the motors using the input.
         """

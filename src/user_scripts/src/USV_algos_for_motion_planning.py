@@ -5,9 +5,8 @@ from src.user_scripts.config import parameters
 import matplotlib.pyplot as plt
 
 
-
 class USV_algos_for_motion_planning:
-    def cap_to(self, psi_desired_deg, v_desired = 255):
+    def cap_to(self, psi_desired_deg:float, v_desired:float = 255)->None:
         """
         Sets the USV to a certain heading
         """
@@ -16,12 +15,12 @@ class USV_algos_for_motion_planning:
             self.control_step(v_desired, np.radians(psi_desired_deg))
             time.sleep(0.05)
 
-    def direct_waypoints(self, x_USV, y_USV, x_target, y_target):
+    def direct_waypoints(self, x_USV:float, y_USV:float, x_target:float, y_target:float)->float:
         vector = np.array([x_target - x_USV, y_target - y_USV])
         desired_heading = vector_to_heading(vector)
         return desired_heading
 
-    def vector_field(self, x_USV, y_USV, x_target, y_target, dict_obstacles=parameters["dict_of_obstacles"]):
+    def vector_field(self, x_USV:float, y_USV:float, x_target:float, y_target:float, dict_obstacles:dict=parameters["dict_of_obstacles"])->tuple[float,dict,float]:
         k_attractive = 1
         k_repulsive = 2
         k_obstacle_influence = 3 # gain multiplied by the radius to have the surface in which the robot will be repulsed by the obstacle
