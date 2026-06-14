@@ -2,6 +2,7 @@ import threading
 import time
 
 from src.map.mapbuilder import mapbuilder
+from src.map.mapbuilder2 import mapbuilder2
 from src.graphics.graphical_interface import graphical_interface
 from src.fleet.fleet_manager import fleet_manager
 
@@ -14,8 +15,8 @@ class software:
         self.parameters = parameters
         # Create instances of the main classes
         self.fleet_manager = fleet_manager(self.parameters)
-        self.map_builder = mapbuilder(self.parameters)
-        self.graphical_interface = graphical_interface(self.parameters, fleet_manager = self.fleet_manager, map_builder = self.map_builder)
+        # self.map_builder = mapbuilder(self.parameters)
+        self.graphical_interface = graphical_interface(self.parameters, fleet_manager = self.fleet_manager)
         
         # Start everything in separate threads
         self.intialize_thread()
