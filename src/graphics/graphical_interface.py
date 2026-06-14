@@ -12,6 +12,8 @@ class graphical_interface:
         self.dt = parameters["dt"]
         self.fleet_manager = fleet_manager
         self.map_builder = map_builder
+        print(f'Init Graphical Interface ...')
+        print("--------------------")
         self.setup()          
 
     def setup(self):

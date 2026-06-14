@@ -39,9 +39,7 @@ class USV_sensors:
         Conversion function to getx,y coordinates from latitude and longitude. The unit is in meters. 
         The origin (0,0) is found in he latlon_to_xy function in utils.py.
         """
-        print("getting lat lon USV position...")
         lat, lon = self.current_lat_lon_position()
-        print("getting x,y fron lat lon...")
         if lat is not None and lon is not None:
             x, y = latlon_to_xy(lat, lon)
         else:

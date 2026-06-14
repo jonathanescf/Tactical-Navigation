@@ -1,5 +1,6 @@
 import numpy as np
 import threading 
+import time
 
 from src.hardware.fake_USV_drivers.fake_USV_driver_arduino import fake_USV_ardu
 from src.hardware.fake_USV_drivers.fake_USV_driver_gps import fake_USV_gps
@@ -81,17 +82,15 @@ class USV:
         Used to update the USV state using physics equations.
         K and L are arbitrary, further research should be conducted to make the physics more realistic
         """
-        print("physic_step acquiring the usv_lock...")
 
         with self.usv_lock:
-            print("physic_step has the usv_lock...")
             # modèle idéal : vitesse instantanée
             K = 0.05
             L = 0.25
-            v     = 2 * K * (self._Ul + self._Ur) / 2
+            v     =  K * (self._Ul + self._Ur) / 2
             omega = K * (self._Ur - self._Ul) / (2 * L)
             self._x   += v * np.cos(self._psi_rad) * dt
             self._y   += v * np.sin(self._psi_rad) * dt
             self._psi_rad  = (self._psi_rad + omega * dt) % (2 * np.pi)
-        print("physic_step releases the usv_lock...")
+            
             

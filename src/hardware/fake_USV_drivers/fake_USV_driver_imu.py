@@ -1,14 +1,14 @@
 import numpy as np
-from src.fleet.USV import USV
 
 
-
+#TODO: ajouter du bruit aux filtres pour les rendre plus réalistes
 class fake_USV_imu:
-    def __init__(self, USV:USV):
+    def __init__(self, USV):
         """
         This is a fake IMU driver that simulates magnetometer readings based on the USV's heading (psi).
         """
         self.USV = USV
+        print(f'Init IMU for USV {self.USV._id}...')
 
     def read_mag_raw(self)->list[float,float,float]:
         """

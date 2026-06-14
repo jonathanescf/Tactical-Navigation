@@ -1,14 +1,14 @@
-from src.fleet.USV import USV
 
+#TODO: ajouter du bruit aux filtres pour les rendre plus réalistes
 class fake_USV_ardu():
-    def __init__(self, USV:USV):
+    def __init__(self, USV):
         """
         This class simulates the arduino motor driver. It takes the motor commands that would be sent to the arduino and updates the USV state accordingly. It serves as an intermediate between the navigation algorithms and the USV physics.
         """
         self.USV = USV
         self.cmd_left = 0
         self.cmd_right = 0
-        print('Init Arduino ...')
+        print(f'Init Arduino for USV {self.USV._id}...')
 
     def bound_cmd (self,cmd0:float)->float:
         """

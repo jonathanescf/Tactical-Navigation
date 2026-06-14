@@ -19,7 +19,5 @@ class USV_control:
         """
 
         delta_w =  -sawtooth(self.current_heading() - psi_desired_rad)
-        print("going to control law...")
         Ur, Ul = self.control_law(v_desired, delta_w)
-        print("going out of control law...")
         self.ardu.send_arduino_cmd_motor(Ul, Ur)

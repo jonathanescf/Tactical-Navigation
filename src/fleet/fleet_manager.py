@@ -5,6 +5,9 @@ from src.fleet.USV import USV
 class fleet_manager:
     def __init__(self, parameters:dict):
         self.nb_USVs = parameters["nb_of_USVs"]
+        print("--------------------")
+        print(f'Creation of the fleet ...')
+        print(f"number of USVs: {self.nb_USVs}")
         self.initialization()
         
 

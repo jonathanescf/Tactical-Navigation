@@ -4,6 +4,7 @@ class mapbuilder:
     def __init__(self, parameters:dict):
         self.waypoint = waypoint(parameters["nb_of_waypoints"], parameters["dict_of_waypoints"])
         self.obstacle = obstacle(parameters["nb_of_obstacles"], parameters["dict_of_obstacles"])
+        print(f'Building the map ...')
 
 class waypoint:
     def __init__(self,nb_of_waypoints:int = 1, dict_of_waypoints:dict = None):
