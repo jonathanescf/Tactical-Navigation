@@ -20,4 +20,8 @@ Ideas that I have for now:
 - Order waypoints using the nearest neigbourgh frist 
 
 
+## Disclaimer
 
+For a quick but temporary result to test the potential field vector algorithm, I got help from Claude to get the code for the graphical interface and the plot.py script. 
+
+This will csoon be deleted in order to have a proper graphical interface, that will be made by my hand. 
