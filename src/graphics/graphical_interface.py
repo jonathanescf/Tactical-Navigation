@@ -17,7 +17,7 @@ class graphical_interface:
         self.setup()          
 
     def setup(self):
-        self.setup_display_graphics()
+        self.setup_display_graphics() 
         self.setup_USVs_graphics()
         self.setup_map_graphics()
 

@@ -33,9 +33,9 @@ class map_builder2:
                 if np.abs(x - y) < 25:
                     map_array[i][j] = 1
 
-        plt.imshow(map_array, cmap='gray', vmin=0, vmax=1)
-        plt.axis('off')
-        plt.show()
+        # plt.imshow(map_array, cmap='gray', vmin=0, vmax=1)
+        # plt.axis('off')
+        # plt.show()
 
 
 if __name__ == "__main__":
