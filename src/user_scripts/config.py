@@ -5,7 +5,7 @@ parameters = {
     "nb_of_obstacles": 15,
 
     "dict_of_waypoints": {
-        1: (250, 180),
+        1: (90, 50),
         2: (-220, 140), 
         # 3: (100, -250), not working
         4: (-180, -200),

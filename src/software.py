@@ -15,8 +15,12 @@ class software:
         self.parameters = parameters
         # Create instances of the main classes
         self.fleet_manager = fleet_manager(self.parameters)
-        # self.map_builder = mapbuilder(self.parameters)
-        self.graphical_interface = graphical_interface(self.parameters, fleet_manager = self.fleet_manager)
+        self.map_builder = mapbuilder(self.parameters)
+        self.graphical_interface = graphical_interface(self.parameters, 
+                                                       fleet_manager = self.fleet_manager, 
+                                                       map_builder = self.map_builder,
+                                                       get_static_snapshot = self.static_snapshot,
+                                                       get_dynamic_snapshot = self.dynamic_snapshot)
         
         # Start everything in separate threads
         self.intialize_thread()
@@ -43,7 +47,43 @@ class software:
         self.thread_physics_loop = threading.Thread(target=self.physics_loop, daemon=True)
         self.thread_physics_loop.start()
 
+    def static_snapshot(self):
+        """
+        Creates a dict with allthe map informaation for the simulation. sent at the beginning onl once. Useful for visualization.
+        """
+        list_waypoints = []
+        for waypoint_id, waypoint in self.map_builder.waypoint.dico_of_waypoints.items():
+            list_waypoints.append({"id": waypoint_id,
+                                   "pose": {"x": waypoint[0],
+                                            "y": waypoint[1]}})
 
+        list_obstacles = []
+        for obstacle_id, obstacle in self.map_builder.obstacle.dico_of_obstacles.items():
+            list_obstacles.append({"id": obstacle_id,
+                                   "pose": {"x": obstacle[0],
+                                            "y": obstacle[1],
+                                            },
+                                    "radius": obstacle[2]})
+
+        return {"waypoints": list_waypoints, "obstacles": list_obstacles}
+
+    def dynamic_snapshot(self, t_s):
+        """
+        Creates a dict with the state of every asset at the instant it is called. Useful to record simulation logs and for visualization.
+        """
+        list_assets_states = []
+        for asset in self.fleet_manager.list_of_assets:
+            list_assets_states.append({"id": asset.id,
+                                       "type": asset.type,
+                                       "pose": {"x": asset.x,
+                                                "y": asset.y,
+                                                "psi_rad": asset.psi_rad},
+                                     })
+
+        return {"time": t_s,
+                "dt" : self.parameters["dt"], 
+                "assets_state": list_assets_states}
+    
     #TODO: should stop every thread with a stop event.
 
         
