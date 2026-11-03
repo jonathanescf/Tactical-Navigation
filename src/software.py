@@ -8,8 +8,6 @@ from src.fleet.fleet_manager import fleet_manager
 class software:
 
     def __init__(self, parameters:dict):
-        print("--------------------")
-        print("Starting the software")
         self.software_running = True
         self.parameters = parameters
         # Create instances of the main classes
@@ -22,7 +20,7 @@ class software:
                                                        get_dynamic_snapshot = self.dynamic_snapshot)
         
         # Start everything in separate threads
-        self.intialize_thread()
+        self.initialize_threads()
         self.graphical_interface.run()
         
     def physics_loop(self):
@@ -32,16 +30,15 @@ class software:
             time.sleep(self.parameters["dt"])
 
     def initialize_USVs(self):
-        # input("Appuie sur Entrée pour tester les moteurs...")
         self.thread_fleet_dict = {}
         for i in range(1, self.fleet_manager.nb_USVs + 1):
             self.thread_fleet_dict[i] = threading.Thread(target=self.fleet_manager.USV[i].do.wrapper, daemon=True)
             self.thread_fleet_dict[i].start()
     
-    def intialize_thread(self):
+    def initialize_threads(self):
         
-        self.thread_IHM = threading.Thread(target=self.initialize_USVs, daemon=True)
-        self.thread_IHM.start()
+        self.thread_init_usvs = threading.Thread(target=self.initialize_USVs, daemon=True)
+        self.thread_init_usvs.start()
 
         self.thread_physics_loop = threading.Thread(target=self.physics_loop, daemon=True)
         self.thread_physics_loop.start()

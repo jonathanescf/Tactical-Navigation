@@ -16,11 +16,18 @@ class USV_algos_for_motion_planning:
             time.sleep(0.05)
 
     def direct_waypoints(self, x_USV:float, y_USV:float, x_target:float, y_target:float)->float:
+        """
+        Does not take into account obstacle avoidance
+        """      
         vector = np.array([x_target - x_USV, y_target - y_USV])
         desired_heading = vector_to_heading(vector)
         return desired_heading
 
     def vector_field(self, x_USV:float, y_USV:float, x_target:float, y_target:float, dict_obstacles:dict=parameters["dict_of_obstacles"])->tuple[float,dict,float]:
+        """
+        Takes into account the obstacle avoidance
+        """
+        
         k_attractive = 1
         k_repulsive = 2
         k_obstacle_influence = 3 # gain multiplied by the radius to have the surface in which the robot will be repulsed by the obstacle

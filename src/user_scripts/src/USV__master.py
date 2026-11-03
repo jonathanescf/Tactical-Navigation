@@ -8,14 +8,13 @@ from src.user_scripts.config import parameters
 from src.user_scripts.src.USV_algos_for_motion_planning import USV_algos_for_motion_planning
 from src.user_scripts.src.USV_control import USV_control
 from src.user_scripts.src.USV_sensors import USV_sensors
-from src.user_scripts.src.USV_wrapper import USV_wrapper
 
 from src.hardware.fake_USV_drivers.fake_USV_driver_arduino import fake_USV_ardu
 from src.hardware.fake_USV_drivers.fake_USV_driver_gps import fake_USV_gps
 from src.hardware.fake_USV_drivers.fake_USV_driver_imu import fake_USV_imu
 
 
-class USV_master(USV_algos_for_motion_planning, USV_control, USV_sensors, USV_wrapper):
+class USV_master(USV_algos_for_motion_planning, USV_control, USV_sensors):
     def __init__(self, ardu:fake_USV_ardu, gps:fake_USV_gps, imu:fake_USV_imu):
         self.ardu = ardu
         self.gps = gps
@@ -37,7 +36,6 @@ class USV_master(USV_algos_for_motion_planning, USV_control, USV_sensors, USV_wr
         self.running = True
         
         while self.running:
-
 
             x_USV, y_USV = self.current_x_y_position()
 
@@ -71,4 +69,13 @@ class USV_master(USV_algos_for_motion_planning, USV_control, USV_sensors, USV_wr
             print(f"waypoint {i} reached")
 
         self.ardu.send_arduino_cmd_motor(0, 0)
-    
+
+    def wrapper(self):
+        self.running = True
+        mission = "wpts"
+        
+        while self.running ==True:
+            if mission == "test":
+                self.test()
+            elif mission == "wpts":
+                self.go_to_waypoints()
