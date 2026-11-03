@@ -2,7 +2,6 @@ import threading
 import time
 
 from src.map.mapbuilder import mapbuilder
-from src.map.mapbuilder2 import mapbuilder2
 from src.graphics.graphical_interface import graphical_interface
 from src.fleet.fleet_manager import fleet_manager
 

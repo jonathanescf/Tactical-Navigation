@@ -11,13 +11,6 @@ from typing import Callable
 
 
 class graphical_interface:
-<<<<<<< HEAD
-    def __init__(self, parameters:dict, fleet_manager:fleet_manager = None, map_builder:mapbuilder = None, map_builder2:mapbuilder2 = None):
-        self.dt = parameters["dt"]
-        self.fleet_manager = fleet_manager
-        self.map_builder = map_builder
-        self.map_builder2 = map_builder2
-=======
     def __init__(self, parameters:dict, 
                  fleet_manager:fleet_manager = None, 
                  map_builder:mapbuilder = None,
@@ -29,7 +22,6 @@ class graphical_interface:
         self.map_builder = map_builder
         self.get_static_snapshot = get_static_snapshot
         self.get_dynamic_snapshot = get_dynamic_snapshot
->>>>>>> origin/main
         print(f'Init Graphical Interface ...')
         print("--------------------")
         self.setup()          
