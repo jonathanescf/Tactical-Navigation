@@ -15,6 +15,7 @@ class USV:
         self.usv_lock = threading.Lock()
 
         self._id = id
+        self._type = "USV"
         self._x = x0
         self._y = y0
         self._psi_rad = psi_rad0
@@ -26,6 +27,17 @@ class USV:
         self.fake_imu  = fake_USV_imu(USV = self)
         
         self.do  = USV_master(ardu = self.fake_ardu,gps = self.fake_gps,imu = self.fake_imu)
+
+
+    @property
+    def id(self):
+        with self.usv_lock:
+            return self._id
+
+    @property
+    def type(self):
+        with self.usv_lock:
+            return self._type
 
     @property
     def x(self):
@@ -85,8 +97,8 @@ class USV:
 
         with self.usv_lock:
             # modèle idéal : vitesse instantanée
-            K = 0.05
-            L = 0.25
+            K = 0.2 #0.05
+            L = 1
             v     =  K * (self._Ul + self._Ur) / 2
             omega = K * (self._Ur - self._Ul) / (2 * L)
             self._x   += v * np.cos(self._psi_rad) * dt
