@@ -1,0 +1,46 @@
+import numpy as np
+
+# Reference point for letlon to x y conversion (the current coordinates are Paris, but they can be changed to any other location)
+LAT0 = 48.8566        
+LON0 =  2.3522
+METER_PER_DEG_LAT = 111320.0
+METER_PER_DEG_LON = 111320.0 * np.cos(np.radians(LAT0))
+
+parameters = {
+    "dt": 0.05,
+    "nb_of_USVs": 1,
+    "nb_of_waypoints": 10,
+    "nb_of_obstacles": 15,
+
+    "dict_of_waypoints": {
+        1: (90, 50),
+        2: (-220, 140), 
+        # 3: (100, -250), not working
+        4: (-180, -200),
+        5: (290, -50),
+        6: (-270, 260),
+        7: (50, 220),
+        8: (-80, 0),
+        9: (180, -170),
+        10: (-300, 50)
+    },
+
+    "dict_of_obstacles": {
+        1: (-250, -100, 20.5),
+        2: (-180, 220, 21.1),
+        3: (-120, -250, 21.8),
+        4: (-50, 150, 22.4),
+        5: (0, -50, 23.0),
+        6: (40, 280, 23.7),
+        7: (90, -180, 24.3),
+        8: (130, 100, 24.9),
+        9: (170, -20, 25.6),
+        10: (210, 250, 26.2),
+        11: (260, -240, 26.9),
+        12: (-290, 20, 27.5),
+        13: (-30, -120, 28.1),
+        14: (280, 80, 28.8),
+        15: (-140, 40, 29.4)
+    }
+}
+

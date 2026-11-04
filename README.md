@@ -66,14 +66,14 @@ This opens two windows side by side: the live simulation (`main.py`) and the pot
 
 ```bash
 uv run python main.py
-uv run python -m src.user_scripts.utilities.plot
+uv run python -m src.autonomy.utilities.plot
 ```
 
 Available missions: `wpts` (go to the waypoints) and `test` (drive straight, to check that the USV moves).
 
 ## Configuration
 
-Everything is set in `src/user_scripts/config.py`:
+Everything is set in `src/autonomy/config.py`:
 
 | Parameter | Meaning |
 |---|---|
@@ -83,26 +83,8 @@ Everything is set in `src/user_scripts/config.py`:
 | `dict_of_obstacles` | `{id: (x, y, radius)}` in meters. If `None`, random obstacles are generated |
 | `nb_of_waypoints`, `nb_of_obstacles` | Number of random waypoints / obstacles when no dictionary is given |
 
-Conventions: positions are in meters, headings in radians measured from the x axis. The origin `(0, 0)` corresponds to `LAT0`, `LON0` in `fake_USV_driver_gps.py` (Paris by default).
+Conventions: positions are in meters, headings in radians measured from the x axis. The origin `(0, 0)` corresponds to `LAT0`, `LON0` in `config.py` (Paris by default).
 
-## Project structure
-
-```
-.
-├── main.py                  # Starts the simulation
-├── launch.py                # Starts the simulation and the plot side by side
-└── src/
-    ├── software.py          # Creates the fleet, the map and the GUI, and starts the threads
-    ├── fleet/               # USV state and physics, fleet manager
-    ├── hardware/
-    │   └── fake_USV_drivers/  # Simulated Arduino, GNSS and IMU
-    ├── map/                 # Waypoints and obstacles
-    ├── graphics/            # Matplotlib window
-    └── user_scripts/        # Everything the user writes for the USV
-        ├── config.py
-        ├── src/             # Sensors, control, motion planning, missions
-        └── utilities/       # Helper functions and the potential field plot
-```
 
 ## How it works
 

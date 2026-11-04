@@ -1,6 +1,5 @@
 
-from src.fleet.fleet_manager import fleet_manager
-from src.map.mapbuilder import mapbuilder
+from src.simulation.simulator import simulator
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,14 +10,12 @@ from typing import Callable
 
 class graphical_interface:
     def __init__(self, parameters:dict, 
-                 fleet_manager:fleet_manager = None, 
-                 map_builder:mapbuilder = None,
+                 simulator:simulator = None, 
                  get_static_snapshot:Callable[[], dict] = None,
                  get_dynamic_snapshot:Callable[[float], dict] = None):
         
         self.dt = parameters["dt"]
-        self.fleet_manager = fleet_manager
-        self.map_builder = map_builder
+        self.simulator = simulator
         self.get_static_snapshot = get_static_snapshot
         self.get_dynamic_snapshot = get_dynamic_snapshot
         print(f'Init Graphical Interface ...')
@@ -52,7 +49,7 @@ class graphical_interface:
         self.arrows = {}
         list_assets_states = self.get_dynamic_snapshot(0)["assets_state"]
         for asset_usv in list_assets_states:
-            # USV = self.fleet_manager.USV[i]
+            # USV = self.simulator.USV[i]
             x, y, psi_rad = asset_usv["pose"]["x"], asset_usv["pose"]["y"], asset_usv["pose"]["psi_rad"]
             self.arrows[asset_usv["id"]] = self.ax.annotate(
                 '',
@@ -74,25 +71,18 @@ class graphical_interface:
 
     def setup_map_graphics(self):
         """
-        sets up the different map elements on the simulation
+        Sets up the static map elements (drawn once) and the containers
+        for the dynamic ones (created on demand in update_map).
         """
-        if self.map_builder is None:
-            return
-
-        self.waypoint_plots  = {}
         self.obstacle_plots = {}
+        self.target_plots = {}
 
         map_elements = self.get_static_snapshot()
 
-        for waypoint in map_elements["waypoints"]:
-            x, y = waypoint["pose"]["x"], waypoint["pose"]["y"]
-            plot,  = self.ax.plot(x, y, 'go', markersize=8, zorder=3)
-            label  = self.ax.annotate(f"WP{waypoint['id']}", (x, y-3), color='green', fontsize=8)
-            self.waypoint_plots[waypoint["id"]] = (plot, label)
-        
         for obstacle in map_elements["obstacles"]:
             x, y, radius = obstacle["pose"]["x"], obstacle["pose"]["y"], obstacle["radius"]
-            circle = patches.Circle((x, y), radius=radius, fill=True, edgecolor='red', linewidth=2, zorder=3)
+            circle = patches.Circle((x, y), radius=radius, fill=True,
+                                    edgecolor='red', linewidth=2, zorder=3)
             self.ax.add_patch(circle)
             self.obstacle_plots[obstacle["id"]] = circle
 
@@ -127,26 +117,23 @@ class graphical_interface:
             self.arrows[asset_usv_state["id"]].xy = pointe
 
     def update_map(self, snap):
-        if self.map_builder is None:
-            return
+        for a in snap["assets_state"]:
+            t = a.get("ongoing_target")
+            entry = self.target_plots.get(a["id"])
 
-        for i, (x, y) in self.map_builder.waypoint.dico_of_waypoints.items():
-            plot, label = self.waypoint_plots[i]
-            plot.set_data([x], [y])
-            label.set_position((x, y))
+            if t is None:
+                if entry:
+                    entry[0].set_data([], [])
+                    entry[1].set_visible(False)
+                continue
 
-        for i, (x, y, radius) in self.map_builder.obstacle.dico_of_obstacles.items():
-            self.obstacle_plots[i].center = (x, y)
-        
-        for i in list(self.waypoint_plots.keys()):
-            if i not in self.map_builder.waypoint.dico_of_waypoints:
-                # waypoint atteint → on efface l'artiste matplotlib
-                plot, label = self.waypoint_plots[i]
-                plot.remove()
-                label.remove()
-                del self.waypoint_plots[i]   # on nettoie le dico des artistes
-            else:
-                plot, label = self.waypoint_plots[i]
-                x, y = self.map_builder.waypoint.dico_of_waypoints[i]
-                plot.set_data([x], [y])
-                label.set_position((x, y))
+            if entry is None:   # création à la volée, une seule fois par asset
+                plot, = self.ax.plot([], [], 'g*', markersize=14, zorder=3)
+                label = self.ax.annotate('', (0, 0), color='green', fontsize=8)
+                entry = self.target_plots[a["id"]] = (plot, label)
+
+            plot, label = entry
+            plot.set_data([t["x"]], [t["y"]])
+            label.set_text(f"TARGET for USV {a['id']}")
+            label.set_position((t["x"], t["y"] - 3))
+            label.set_visible(True)
