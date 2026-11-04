@@ -4,6 +4,10 @@ import sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
+# Un seul endroit à modifier quand un fichier bouge.
+SIM_CMD  = [sys.executable, "main.py"]
+PLOT_CMD = [sys.executable, "-m", "tools.plot"]
+
 
 def screen_size():
     """Taille de l'écran (ou de l'ensemble des écrans côte à côte)."""
@@ -29,8 +33,8 @@ if __name__ == "__main__":
     half, h = W // 2, H - 80         # 80 px de marge pour la barre de titre et le dock
 
     procs = [
-        start([sys.executable, "main.py"], (0, 0, half, h)),
-        start([sys.executable, "-m", "src.user_scripts.utilities.plot"], (half, 0, half, h)),
+        start(SIM_CMD,  (0,    0, half, h)),
+        start(PLOT_CMD, (half, 0, half, h)),
     ]
     try:
         for p in procs:
