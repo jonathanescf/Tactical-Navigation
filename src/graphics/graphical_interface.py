@@ -1,6 +1,4 @@
 
-from src.simulation.simulator import simulator
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -10,12 +8,10 @@ from typing import Callable
 
 class graphical_interface:
     def __init__(self, parameters:dict, 
-                 simulator:simulator = None, 
                  get_static_snapshot:Callable[[], dict] = None,
                  get_dynamic_snapshot:Callable[[float], dict] = None):
         
         self.dt = parameters["dt"]
-        self.simulator = simulator
         self.get_static_snapshot = get_static_snapshot
         self.get_dynamic_snapshot = get_dynamic_snapshot
         print(f'Init Graphical Interface ...')
@@ -49,7 +45,6 @@ class graphical_interface:
         self.arrows = {}
         list_assets_states = self.get_dynamic_snapshot(0)["assets_state"]
         for asset_usv in list_assets_states:
-            # USV = self.simulator.USV[i]
             x, y, psi_rad = asset_usv["pose"]["x"], asset_usv["pose"]["y"], asset_usv["pose"]["psi_rad"]
             self.arrows[asset_usv["id"]] = self.ax.annotate(
                 '',

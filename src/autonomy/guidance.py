@@ -1,13 +1,13 @@
 import time
 import numpy as np
 from src.autonomy.utils import *
-from src.orchestration.config import parameters
 import matplotlib.pyplot as plt
 
 
 class USV_Guidance:
 
-    def direct_waypoints(self, x_USV:float, y_USV:float, x_target:float, y_target:float)->float:
+    def direct_waypoints(self, x_USV:float, y_USV:float, 
+                               x_target:float, y_target:float)->float:
         """
         Does not take into account obstacle avoidance
         """      
@@ -15,7 +15,9 @@ class USV_Guidance:
         desired_heading = vector_to_heading(vector)
         return desired_heading
 
-    def vector_field(self, x_USV:float, y_USV:float, x_target:float, y_target:float, dict_obstacles:dict=parameters["dict_of_obstacles"])->tuple[float,dict,float]:
+    def vector_field(self, x_USV:float, y_USV:float, 
+                           x_target:float, y_target:float, 
+                           dict_obstacles:dict)->tuple[float,dict,float]:
         """
         Takes into account the obstacle avoidance
         """
@@ -65,8 +67,10 @@ class USV_Guidance:
     def get_desired_speed(self, distance_to_target):
         return 255 * np.tanh(distance_to_target)
 
-    def get_desired_heading(self, x_USV, y_USV, x_target, y_target):
-        desired_heading, U_dict, k_obstacle_influence = self.vector_field(x_USV, y_USV, x_target, y_target)
+    def get_desired_heading(self, x_USV, y_USV, 
+                                  x_target, y_target, 
+                                  dict_obstacles=None):
+        desired_heading, U_dict, k_obstacle_influence = self.vector_field(x_USV, y_USV, x_target, y_target, dict_obstacles)
         return desired_heading
 
        

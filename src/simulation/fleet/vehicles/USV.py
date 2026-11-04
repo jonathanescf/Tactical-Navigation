@@ -1,6 +1,5 @@
 import numpy as np
 import threading 
-import time
 
 from src.simulation.fleet.hardware.fake_USV_motor_driver import fake_USV_ardu
 from src.simulation.fleet.hardware.fake_GPS_driver import fake_USV_gps
@@ -10,7 +9,7 @@ from src.autonomy.brain import USV_brain
 
 
 class USV:
-    def __init__(self, id:int, x0:float = 0, y0:float = 0, psi_rad0:float = 0):
+    def __init__(self, id:str, x0:float = 0, y0:float = 0, psi_rad0:float = 0):
 
         self.usv_lock = threading.Lock()
 

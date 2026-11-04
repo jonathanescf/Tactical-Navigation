@@ -14,7 +14,6 @@ class software:
         self.simulator = simulator(self.parameters)
         self.map_builder = mapbuilder(self.parameters)
         self.graphical_interface = graphical_interface(self.parameters, 
-                                                       simulator = self.simulator, 
                                                        get_static_snapshot = self.static_snapshot,
                                                        get_dynamic_snapshot = self.dynamic_snapshot)
         
@@ -24,8 +23,8 @@ class software:
         
     def physics_loop(self):
         while self.software_running:
-            for USV in self.simulator.USV.values():
-                USV.physic_step(self.parameters["dt"])
+            for asset in self.simulator.dict_of_assets.values():
+                asset.physic_step(self.parameters["dt"])
             time.sleep(self.parameters["dt"])
 
     def brain_loop(self):

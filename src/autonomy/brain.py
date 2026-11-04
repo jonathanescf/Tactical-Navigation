@@ -10,18 +10,17 @@ from src.autonomy.control import USV_Control
 from src.autonomy.navigation import USV_Navigation
 from src.autonomy.mission import USV_Mission
 
-from src.simulation.fleet.hardware.fake_USV_motor_driver import fake_USV_ardu
-from src.simulation.fleet.hardware.fake_GPS_driver import fake_USV_gps
-from src.simulation.fleet.hardware.fake_IMU_driver import fake_USV_imu
 
 
 class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
-    def __init__(self, ardu:fake_USV_ardu, gps:fake_USV_gps, imu:fake_USV_imu):
+    def __init__(self, ardu, gps, imu): #no need to tell the type for dependancy purpose. 
+                                        # USV_brain just communicates with the objects given without knowing what they are
         self.ardu = ardu
         self.gps = gps
         self.imu = imu
         self.ongoing_target_state = None, None, None, None
         self.waypoints = list(parameters["dict_of_waypoints"].items())
+        self.dict_obstacles = parameters["dict_of_obstacles"]
         self.wp_index = 0
 
     def target_reached(self):
@@ -40,7 +39,7 @@ class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
             self.ardu.send_arduino_cmd_motor(0, 0)
             return
 
-        Ul, Ur, TargetIntercepted = self.go_to_target_step(nav_state, self.ongoing_target_state)
+        Ul, Ur, TargetIntercepted = self.go_to_target_step(nav_state, self.ongoing_target_state, self.dict_obstacles)
         self.ardu.send_arduino_cmd_motor(Ul, Ur)
 
         if TargetIntercepted:
