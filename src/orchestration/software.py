@@ -28,11 +28,21 @@ class software:
                 USV.physic_step(self.parameters["dt"])
             time.sleep(self.parameters["dt"])
 
+    def brain_loop(self):
+        while self.software_running:
+            for asset in self.simulator.list_of_assets:
+                asset.do.brain_step()
+            time.sleep(self.parameters["dt"])
+
+
     def initialize_USVs(self):
-        self.thread_fleet_dict = {}
-        for i in range(1, self.simulator.nb_USVs + 1):
-            self.thread_fleet_dict[i] = threading.Thread(target=self.simulator.USV[i].do.wrapper, daemon=True)
-            self.thread_fleet_dict[i].start()
+        
+        self.thread_brain = threading.Thread(target=self.brain_loop, daemon=True)
+        self.thread_brain.start()
+        # self.thread_fleet_dict = {}
+        # for i in range(1, self.simulator.nb_USVs + 1):
+        #     self.thread_fleet_dict[i] = threading.Thread(target=self.simulator.USV[i].do.wrapper, daemon=True)
+        #     self.thread_fleet_dict[i].start()
     
     def initialize_threads(self):
         

@@ -6,7 +6,7 @@ from src.simulation.fleet.hardware.fake_USV_motor_driver import fake_USV_ardu
 from src.simulation.fleet.hardware.fake_GPS_driver import fake_USV_gps
 from src.simulation.fleet.hardware.fake_IMU_driver import fake_USV_imu
 
-from src.autonomy.src.USV__master import USV_master
+from src.autonomy.brain import USV_brain
 
 
 class USV:
@@ -26,7 +26,7 @@ class USV:
         self.fake_gps  = fake_USV_gps(USV = self)
         self.fake_imu  = fake_USV_imu(USV = self)
         
-        self.do  = USV_master(ardu = self.fake_ardu,gps = self.fake_gps,imu = self.fake_imu)
+        self.do  = USV_brain(ardu = self.fake_ardu,gps = self.fake_gps,imu = self.fake_imu)
 
 
     @property

@@ -1,8 +1,8 @@
 import numpy as np
-from src.autonomy.utilities.utils import *
+from src.autonomy.utils import *
 
 
-class USV_sensors:
+class USV_Navigation:
     def current_heading(self)->float:
         """
         Function to get the heading of the USV using the magnetometer of the IMU. The unit is in radians.
@@ -15,7 +15,7 @@ class USV_sensors:
         """
         The speed is taken from the motor command, K is given to have an exact estimate. This is ideal and should be changed.
         """
-        K = 0.05
+        K = 0.2
         Ul, Ur = self.ardu.get_arduino_cmd_motor()
         v     = K * (Ul + Ur) / 2
         return v
@@ -45,3 +45,9 @@ class USV_sensors:
         else:
             x, y = None, None
         return x, y
+
+    def get_nav_state(self):
+        x,y = self.current_x_y_position()
+        v = self.current_speed()
+        psi = self.current_heading()
+        return x, y, psi, v

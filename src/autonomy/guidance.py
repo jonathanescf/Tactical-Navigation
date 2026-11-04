@@ -1,19 +1,11 @@
 import time
 import numpy as np
-from src.autonomy.utilities.utils import *
+from src.autonomy.utils import *
 from src.orchestration.config import parameters
 import matplotlib.pyplot as plt
 
 
-class USV_algos_for_motion_planning:
-    def cap_to(self, psi_desired_deg:float, v_desired:float = 255)->None:
-        """
-        Sets the USV to a certain heading
-        """
-        self.running = True
-        while self.running:
-            self.control_step(v_desired, np.radians(psi_desired_deg))
-            time.sleep(0.05)
+class USV_Guidance:
 
     def direct_waypoints(self, x_USV:float, y_USV:float, x_target:float, y_target:float)->float:
         """
@@ -69,5 +61,12 @@ class USV_algos_for_motion_planning:
         desired_heading = vector_to_heading(F_total)
 
         return desired_heading, U_dict, k_obstacle_influence # 2nd and 3rd arguments for plotting purposes
+
+    def get_desired_speed(self, distance_to_target):
+        return 255 * np.tanh(distance_to_target)
+
+    def get_desired_heading(self, x_USV, y_USV, x_target, y_target):
+        desired_heading, U_dict, k_obstacle_influence = self.vector_field(x_USV, y_USV, x_target, y_target)
+        return desired_heading
 
        
