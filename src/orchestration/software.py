@@ -34,7 +34,6 @@ class software:
                 asset.do.brain_step()
             time.sleep(self.parameters["dt"])
 
-
     def initialize_USVs(self):
         
         self.thread_brain = threading.Thread(target=self.brain_loop, daemon=True)
@@ -83,8 +82,10 @@ class software:
                                        "pose": {"x": asset.x,
                                                 "y": asset.y,
                                                 "psi_rad": asset.psi_rad},
-                                        "ongoing_target": {"x": asset.do.ongoing_target[0], 
-                                                           "y": asset.do.ongoing_target[1]}})
+                                        "ongoing_target": {"x": asset.do.ongoing_target_state[0], 
+                                                           "y": asset.do.ongoing_target_state[1],
+                                                           "psi_rad": asset.do.ongoing_target_state[2],
+                                                           "v": asset.do.ongoing_target_state[3]}})
 
         return {"time": t_s,
                 "dt" : self.parameters["dt"], 

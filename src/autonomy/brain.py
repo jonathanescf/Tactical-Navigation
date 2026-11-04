@@ -20,29 +20,33 @@ class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
         self.ardu = ardu
         self.gps = gps
         self.imu = imu
-        self.ongoing_target = None, None
+        self.ongoing_target_state = None, None, None, None
+        self.waypoints = list(parameters["dict_of_waypoints"].items())
+        self.wp_index = 0
 
-    def wrapper(self):
-        mission = "wpts"
-        while True:
-            if mission == "test":
-                self.test()
-            elif mission == "wpts":
-                self.go_to_waypoints()
+    def target_reached(self):
+        self.wp_index += 1
+
+    def next_target(self):
+        if self.wp_index >= len(self.waypoints):
+            return None
+        return self.waypoints[self.wp_index][1]
 
     def brain_step(self):
         nav_state = self.get_nav_state()
-        target_state = (100, -200, None, 0)
+        self.ongoing_target_state = self.next_target()
 
-        if target_state is None:
+        if self.ongoing_target_state is None:
             self.ardu.send_arduino_cmd_motor(0, 0)
             return
 
-        Ul, Ur, TargetIntercepted = self.go_to_target_step(nav_state, target_state)
+        Ul, Ur, TargetIntercepted = self.go_to_target_step(nav_state, self.ongoing_target_state)
         self.ardu.send_arduino_cmd_motor(Ul, Ur)
 
         if TargetIntercepted:
+            self.target_reached()
             print("Target reached")
+        return
 
 
     
