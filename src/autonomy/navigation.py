@@ -15,7 +15,7 @@ class USV_Navigation:
         """
         The speed is taken from the motor command, K is given to have an exact estimate. This is ideal and should be changed.
         """
-        K = 0.2
+        K = 6 / 255
         Ul, Ur = self.ardu.get_arduino_cmd_motor()
         v     = K * (Ul + Ur) / 2
         return v

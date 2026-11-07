@@ -9,12 +9,17 @@ from src.autonomy.brain import USV_brain
 
 
 class USV:
-    def __init__(self, id:str, x0:float = 0, y0:float = 0, psi_rad0:float = 0):
+    def __init__(self, id:str, x0:float = 0, y0:float = 0, psi_rad0:float = 0, 
+                 mission_info:dict={}, terrain=None):
 
         self.usv_lock = threading.Lock()
 
+        self.terrain = terrain
+
         self._id = id
         self._type = "USV"
+        self.max_speed = 6 # m/s
+        self.lenght = 2
         self._x = x0
         self._y = y0
         self._psi_rad = psi_rad0
@@ -25,7 +30,10 @@ class USV:
         self.fake_gps  = fake_USV_gps(USV = self)
         self.fake_imu  = fake_USV_imu(USV = self)
         
-        self.do  = USV_brain(ardu = self.fake_ardu,gps = self.fake_gps,imu = self.fake_imu)
+        self.do  = USV_brain(ardu = self.fake_ardu,
+                             gps = self.fake_gps, 
+                             imu = self.fake_imu,
+                             mission_info = mission_info)
 
 
     @property
@@ -96,12 +104,23 @@ class USV:
 
         with self.usv_lock:
             # modèle idéal : vitesse instantanée
-            K = 0.2 #0.05
+            K = self.max_speed / 255
             L = 1
             v     =  K * (self._Ul + self._Ur) / 2
             omega = K * (self._Ur - self._Ul) / (2 * L)
-            self._x   += v * np.cos(self._psi_rad) * dt
-            self._y   += v * np.sin(self._psi_rad) * dt
-            self._psi_rad  = (self._psi_rad + omega * dt) % (2 * np.pi)
+
+            x_new = self._x + v * np.cos(self._psi_rad) * dt
+            y_new = self._y + v * np.sin(self._psi_rad) * dt
+
+            if self.terrain.distance(x_new, y_new) < 0:
+                print("WARNING: COLLISION WITH AN OBSTACLE")
+                self._psi_rad  = (self._psi_rad + omega * dt + np.pi) % (2 * np.pi) 
+                self._x = x_new
+                self._y = y_new
+
+            else:
+                self._x = x_new
+                self._y = y_new
+                self._psi_rad  = (self._psi_rad + omega * dt) % (2 * np.pi)
             
             

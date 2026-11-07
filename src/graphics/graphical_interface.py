@@ -37,19 +37,20 @@ class graphical_interface:
         self.ax.grid(True, linestyle='--', alpha=0.2, color='white')
         self.fig.patch.set_facecolor('#0d1b2a')
 
+
     def setup_USVs_graphics(self):
         """
         sets up the USV representation in the simulation
         """
-        # flèches représentant chaque bateau
         self.arrows = {}
         list_assets_states = self.get_dynamic_snapshot(0)["assets_state"]
         for asset_usv in list_assets_states:
             x, y, psi_rad = asset_usv["pose"]["x"], asset_usv["pose"]["y"], asset_usv["pose"]["psi_rad"]
             self.arrows[asset_usv["id"]] = self.ax.annotate(
                 '',
-                xy=(x + np.cos(psi_rad) * 4, y + np.sin(psi_rad) * 4),
-                xytext=(x,y),
+                xy=(x, y),                                                    # pointe = position du bateau
+                xytext=(x - np.cos(psi_rad) * 2.0,                   # queue = derrière le bateau
+                        y - np.sin(psi_rad) * 2.0),
                 arrowprops=dict(
                     arrowstyle='->', color='#f5c518',
                     lw=2.5,
@@ -57,29 +58,43 @@ class graphical_interface:
                 ),
             )
 
-        # légende
-        for i in range(1, len(list_assets_states) + 1):
-            self.ax.plot([], [], color='#f5c518', label=f'usv asset {i}')
-        if len(list_assets_states)  > 0:
-            self.ax.legend(loc='upper right', facecolor='#1a2a3a',
-                        labelcolor='white', fontsize=8)
+            # légende
+            for i in range(1, len(list_assets_states) + 1):
+                self.ax.plot([], [], color='#f5c518', label=f'usv asset {i}')
+            if len(list_assets_states)  > 0:
+                self.ax.legend(loc='upper right', facecolor='#1a2a3a',
+                            labelcolor='white', fontsize=8)
 
     def setup_map_graphics(self):
         """
         Sets up the static map elements (drawn once) and the containers
         for the dynamic ones (created on demand in update_map).
         """
-        self.obstacle_plots = {}
         self.target_plots = {}
 
         map_elements = self.get_static_snapshot()
+        x0, x1, y0, y1 = map_elements["bounds"]
+        margin = max(map_elements["base_size"]) + 10                               # laisse voir l'encoche qui dépasse de bounds
 
-        for obstacle in map_elements["obstacles"]:
-            x, y, radius = obstacle["pose"]["x"], obstacle["pose"]["y"], obstacle["radius"]
-            circle = patches.Circle((x, y), radius=radius, fill=True,
-                                    edgecolor='red', linewidth=2, zorder=3)
-            self.ax.add_patch(circle)
-            self.obstacle_plots[obstacle["id"]] = circle
+        # --- Terrain : le champ est évalué UNE fois sur une grille d'écran ---
+        xs = np.linspace(x0 - margin, x1 + margin, 500)
+        ys = np.linspace(y0 - margin, y1 + margin, 500)
+        XX, YY = np.meshgrid(xs, ys)
+        D = map_elements["terrain_distance"](XX, YY)
+
+        self.ax.contourf(XX, YY, D, levels=[-1e9, 0], colors=["#aa3333"], zorder=3)   # obstacles et murs
+        self.ax.contour(XX, YY, D, levels=[0], colors="black", linewidths=1.5, zorder=3)  # bord
+
+        # --- Waypoints : statiques, dessinés une fois ---
+        for wp in map_elements["waypoints"]:
+            x, y = wp["pose"]["x"], wp["pose"]["y"]
+            self.ax.plot(x, y, "o", color="#888888", markersize=5, zorder=2)
+            self.ax.annotate(str(wp["id"]), (x, y), textcoords="offset points",
+                            xytext=(5, 5), color="#aaaaaa", fontsize=7)
+
+        # --- Limites d'affichage : lues depuis le snapshot, plus codées en dur ---
+        self.ax.set_xlim(x0 - margin, x1 + margin)
+        self.ax.set_ylim(y0 - margin, y1 + margin)
 
     def run(self):
         """
@@ -105,11 +120,15 @@ class graphical_interface:
 
     def update_USVs(self, snap):
         for asset_usv_state in snap["assets_state"]:
-            x, y, psi_rad = asset_usv_state["pose"]["x"], asset_usv_state["pose"]["y"], asset_usv_state["pose"]["psi_rad"]
-            queue_fleche = (x, y)
-            pointe = (x + np.cos(psi_rad) * 4, y + np.sin(psi_rad) * 4)
-            self.arrows[asset_usv_state["id"]].set_position(queue_fleche)
-            self.arrows[asset_usv_state["id"]].xy = pointe
+            x, y, psi_rad = (asset_usv_state["pose"]["x"],
+                            asset_usv_state["pose"]["y"],
+                            asset_usv_state["pose"]["psi_rad"])
+            pointe = (x, y)                                          # la pointe est sur le bateau
+            queue_fleche = (x - np.cos(psi_rad) * 2.0,      # la queue est derrière, le long du cap
+                            y - np.sin(psi_rad) * 2.0)
+            arrow = self.arrows[asset_usv_state["id"]]
+            arrow.set_position(queue_fleche)
+            arrow.xy = pointe
 
     def update_map(self, snap):
         for a in snap["assets_state"]:

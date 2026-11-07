@@ -1,18 +1,23 @@
 import threading
 import time
 
-from src.simulation.map.map import mapbuilder
+from src.orchestration.builder import *
 from src.graphics.graphical_interface import graphical_interface
 from src.simulation.simulator import simulator
 
 class software:
 
-    def __init__(self, parameters:dict):
+    def __init__(self, parameters:dict, path_scenario):
         self.software_running = True
         self.parameters = parameters
+
+        scenario_info = load_scenario(path_scenario)
+        self.terrain = build_terrain(scenario_info)
+        self.mission_info = build_mission(scenario_info)
+ 
+
         # Create instances of the main classes
-        self.simulator = simulator(self.parameters)
-        self.map_builder = mapbuilder(self.parameters)
+        self.simulator = simulator(self.parameters, self.mission_info, self.terrain)
         self.graphical_interface = graphical_interface(self.parameters, 
                                                        get_static_snapshot = self.static_snapshot,
                                                        get_dynamic_snapshot = self.dynamic_snapshot)
@@ -37,10 +42,6 @@ class software:
         
         self.thread_brain = threading.Thread(target=self.brain_loop, daemon=True)
         self.thread_brain.start()
-        # self.thread_fleet_dict = {}
-        # for i in range(1, self.simulator.nb_USVs + 1):
-        #     self.thread_fleet_dict[i] = threading.Thread(target=self.simulator.USV[i].do.wrapper, daemon=True)
-        #     self.thread_fleet_dict[i].start()
     
     def initialize_threads(self):
         
@@ -51,24 +52,14 @@ class software:
         self.thread_physics_loop.start()
 
     def static_snapshot(self):
-        """
-        Creates a dict with allthe map informaation for the simulation. sent at the beginning onl once. Useful for visualization.
-        """
-        list_waypoints = []
-        for waypoint_id, waypoint in self.map_builder.waypoint.dico_of_waypoints.items():
-            list_waypoints.append({"id": waypoint_id,
-                                   "pose": {"x": waypoint[0],
-                                            "y": waypoint[1]}})
-
-        list_obstacles = []
-        for obstacle_id, obstacle in self.map_builder.obstacle.dico_of_obstacles.items():
-            list_obstacles.append({"id": obstacle_id,
-                                   "pose": {"x": obstacle[0],
-                                            "y": obstacle[1],
-                                            },
-                                    "radius": obstacle[2]})
-
-        return {"waypoints": list_waypoints, "obstacles": list_obstacles}
+        return {
+            "bounds": self.terrain.bounds,
+            "base_size": self.terrain.base_size,
+            "waypoints": [{"id": i, "pose": {"x": x, "y": y}}
+                        for i, (x, y) in enumerate(self.mission_info["waypoints"], start=1)],
+            "terrain_distance": self.terrain.distance,  # a modifier lorsque le gui sera sur web 
+                                                        # (impossible de serialiser une fonction comme ca)
+        }
 
     def dynamic_snapshot(self, t_s):
         """
@@ -82,9 +73,7 @@ class software:
                                                 "y": asset.y,
                                                 "psi_rad": asset.psi_rad},
                                         "ongoing_target": {"x": asset.do.ongoing_target_state[0], 
-                                                           "y": asset.do.ongoing_target_state[1],
-                                                           "psi_rad": asset.do.ongoing_target_state[2],
-                                                           "v": asset.do.ongoing_target_state[3]}})
+                                                           "y": asset.do.ongoing_target_state[1]}})
 
         return {"time": t_s,
                 "dt" : self.parameters["dt"], 

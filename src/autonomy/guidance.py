@@ -70,7 +70,8 @@ class USV_Guidance:
     def get_desired_heading(self, x_USV, y_USV, 
                                   x_target, y_target, 
                                   dict_obstacles=None):
-        desired_heading, U_dict, k_obstacle_influence = self.vector_field(x_USV, y_USV, x_target, y_target, dict_obstacles)
+        # desired_heading, U_dict, k_obstacle_influence = self.vector_field(x_USV, y_USV, x_target, y_target, dict_obstacles)
+        desired_heading = self.direct_waypoints(x_USV, y_USV, x_target, y_target)
         return desired_heading
 
        

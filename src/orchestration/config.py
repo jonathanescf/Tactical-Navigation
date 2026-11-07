@@ -36,18 +36,6 @@ RANDOM_OBSTACLES = {
         13: (-30, -120, 28.1), 14: (280, 80, 28.8),15: (-140, 40, 29.4)
     }
 
-RANDOM_WAYPOINTS = {
-        1: (90, 50, 0, 0),
-        2: (-220, 140, 0, 0), 
-        # 3: (100, -250, 0, 0), not working
-        4: (-180, -200, 0, 0),
-        5: (290, -50, 0, 0),
-        6: (-270, 260, 0, 0),
-        7: (50, 220, 0, 0),
-        8: (-80, 0, 0, 0),
-        9: (180, -170, 0, 0),
-        10: (-300, 50, 0, 0)
-    }
 
 ZIGZAG_WAYPOINTS = {
         1: (50, 220),
@@ -57,11 +45,13 @@ ZIGZAG_WAYPOINTS = {
 
 parameters = {
     "dt": 0.05,
+    "dx": 0.1,
+    "dy": 0.1,
     "nb_of_USVs": 1,
     "nb_of_waypoints": 10,
     "nb_of_obstacles": 15,
     
-    "dict_of_waypoints": RANDOM_WAYPOINTS,
+    "dict_of_waypoints": ZIGZAG_WAYPOINTS,
 
     "dict_of_obstacles": RANDOM_OBSTACLES,
 }

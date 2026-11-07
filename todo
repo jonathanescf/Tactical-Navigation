@@ -5,3 +5,5 @@
 -   adapter graphical interface pour qui recevoir les inputs de l utilisateur, 
     et un layer decision global qui adapte les inputs en mission local pour chaque asset 
     et une fsm pour chaque type d asset permeetant leur autonomie totale en attendant la mission
+
+-   Ajouter une serie d unit tests pour chaque features. (apres une 1ere version satisfaisante)

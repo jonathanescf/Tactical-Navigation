@@ -13,13 +13,13 @@ from src.autonomy.mission import USV_Mission
 
 
 class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
-    def __init__(self, ardu, gps, imu): #no need to tell the type for dependancy purpose. 
+    def __init__(self, ardu, gps, imu, mission_info): #no need to tell the type for dependancy purpose. 
                                         # USV_brain just communicates with the objects given without knowing what they are
         self.ardu = ardu
         self.gps = gps
         self.imu = imu
         self.ongoing_target_state = None, None, None, None
-        self.waypoints = list(parameters["dict_of_waypoints"].items())
+        self.waypoints = mission_info["waypoints"]
         self.dict_obstacles = parameters["dict_of_obstacles"]
         self.wp_index = 0
 
@@ -29,7 +29,7 @@ class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
     def next_target(self):
         if self.wp_index >= len(self.waypoints):
             return None
-        return self.waypoints[self.wp_index][1]
+        return self.waypoints[self.wp_index]
 
     def brain_step(self):
         nav_state = self.get_nav_state()

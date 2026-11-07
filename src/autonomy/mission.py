@@ -26,12 +26,14 @@ class USV_Mission():
                           dict_obstacles, interception_accuracy=3):
 
         x_USV, y_USV, psi_USV, v_USV = nav_state
-        x_target, y_target, psi_target, v_target = target_state
+        x_target, y_target = target_state
 
         distance_to_target = np.sqrt((x_target - x_USV)**2 + (y_target - y_USV)**2)
 
         desired_speed = self.get_desired_speed(distance_to_target)
-        desired_heading = self.get_desired_heading(x_USV = x_USV, y_USV = y_USV, x_target = x_target, y_target = y_target, dict_obstacles= dict_obstacles)
+        desired_heading = self.get_desired_heading(x_USV = x_USV, y_USV = y_USV, 
+                                                   x_target = x_target, y_target = y_target, 
+                                                   dict_obstacles= dict_obstacles)
 
         Ul, Ur = self.controller(v_USV, psi_USV, desired_speed, desired_heading)
 
