@@ -22,22 +22,24 @@ class USV_Mission():
         Ul, Ur = self.controller(v_desired, np.radians(psi_desired_deg))
         return Ul, Ur
     
-    def go_to_target_step(self, nav_state, target_state, 
-                          dict_obstacles, interception_accuracy=3):
+    def go_to_waypoint_step(self, nav_state, waypoint_state, 
+                          dict_obstacles, interception_accuracy=0.1):
 
         x_USV, y_USV, psi_USV, v_USV = nav_state
-        x_target, y_target = target_state
+        x_waypoint, y_waypoint = waypoint_state
 
-        distance_to_target = np.sqrt((x_target - x_USV)**2 + (y_target - y_USV)**2)
+        distance_to_waypoint = np.sqrt((x_waypoint - x_USV)**2 + (y_waypoint - y_USV)**2)
 
-        desired_speed = self.get_desired_speed(distance_to_target)
+        desired_speed = self.get_desired_speed(x_USV = x_USV, y_USV = y_USV, 
+                                               x_target = x_waypoint, y_target = y_waypoint)
+        
         desired_heading = self.get_desired_heading(x_USV = x_USV, y_USV = y_USV, 
-                                                   x_target = x_target, y_target = y_target, 
+                                                   x_target = x_waypoint, y_target = y_waypoint, 
                                                    dict_obstacles= dict_obstacles)
 
         Ul, Ur = self.controller(v_USV, psi_USV, desired_speed, desired_heading)
 
-        if distance_to_target > interception_accuracy:
+        if distance_to_waypoint > interception_accuracy:
             return Ul, Ur, False
         else:
             return 0, 0, True

@@ -29,6 +29,7 @@ class fake_USV_ardu():
         self.cmd_right = self.bound_cmd(cmdr0)
         self.USV.Ul = self.cmd_left
         self.USV.Ur = self.cmd_right
+        print(self.cmd_left, self.cmd_right)
 
     def get_arduino_cmd_motor(self)->tuple[float,float]:
         """

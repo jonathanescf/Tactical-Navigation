@@ -8,10 +8,20 @@ class USV_Control:
         For each physic_step, this function computes a command and comunnicates it to the motors using the input.
         """
 
-        delta_psi_rad =  -sawtooth(psi_real_rad - psi_desired_rad)
+        delta_v =  v_desired - v_real
+        delta_psi_rad =  sawtooth(psi_desired_rad - psi_real_rad)
 
-        Kp  = 200          
-        Ul  = v_desired - Kp * (delta_psi_rad / np.pi)
-        Ur  = v_desired + Kp * (delta_psi_rad / np.pi)
+
+        #TODO! Faire une vraie etude pour trouver les bons gains, le tatonnement ne suffit pas!!!
+        Kp_v = 5
+        Kp_psi  = 250
+
+        U_sum_feedforward = 255 * (v_desired/self.max_speed)
+
+        U_sum_feedback = Kp_v * (delta_v / self.max_speed) # FeedBack: closing the loop using current USV state (Proportionnal)
+        U_diff_feedback = Kp_psi * (delta_psi_rad / np.pi) # FeedBack: closing the loop using current USV state (Proportionnal)
+
+        Ul  = U_sum_feedforward + U_sum_feedback - U_diff_feedback
+        Ur  = U_sum_feedforward + U_sum_feedback + U_diff_feedback
 
         return Ul, Ur

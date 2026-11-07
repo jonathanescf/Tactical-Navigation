@@ -48,8 +48,6 @@ parameters = {
     "dx": 0.1,
     "dy": 0.1,
     "nb_of_USVs": 1,
-    "nb_of_waypoints": 10,
-    "nb_of_obstacles": 15,
     
     "dict_of_waypoints": ZIGZAG_WAYPOINTS,
 

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from src.orchestration.config import parameters
-from src.autonomy.guidance import USV_Guidance
+from src.autonomy.guidance.guidance import USV_Guidance
 
 
 def xy(wp):

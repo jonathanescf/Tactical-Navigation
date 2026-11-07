@@ -7,3 +7,5 @@
     et une fsm pour chaque type d asset permeetant leur autonomie totale en attendant la mission
 
 -   Ajouter une serie d unit tests pour chaque features. (apres une 1ere version satisfaisante)
+
+- ajouter le state a usv brain et differencier, le vrai state de USV et celui de USV brain . trouver une cnvention

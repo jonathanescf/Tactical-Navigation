@@ -8,6 +8,7 @@ class terrain:
     def __init__(self, bounds:tuple, dict_obs, base_size = (75, 50)):
         self.bounds = bounds
         self.base_size = base_size
+        self.spawn = bounds[0] - base_size[0]/2, bounds[3] - base_size[1]/2
         self.dx = parameters["dx"]
         self.dy = parameters["dy"]
         self.init_field(dict_obs)

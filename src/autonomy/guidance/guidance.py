@@ -64,8 +64,19 @@ class USV_Guidance:
 
         return desired_heading, U_dict, k_obstacle_influence # 2nd and 3rd arguments for plotting purposes
 
-    def get_desired_speed(self, distance_to_target):
-        return 255 * np.tanh(distance_to_target)
+    def space_aware_heading(self):
+        pass
+
+    def get_desired_speed(self, x_USV:float, y_USV:float, 
+                               x_target:float, y_target:float):
+        vector = np.array([x_target - x_USV, y_target - y_USV])
+        desired_heading = vector_to_heading(vector)
+
+        delta_heading = desired_heading - self.current_heading()
+
+        desired_speed = 0.75 * self.max_speed * max(0, np.cos(delta_heading))
+
+        return desired_speed
 
     def get_desired_heading(self, x_USV, y_USV, 
                                   x_target, y_target, 

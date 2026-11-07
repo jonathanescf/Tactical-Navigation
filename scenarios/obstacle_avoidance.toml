@@ -30,7 +30,7 @@ rectangles = [
 
 
 [mission]
-arrival_radius = 3.0 # validation distance for a waypoint
+arrival_radius = 0.5 # validation distance for a waypoint
 
 waypoints = [
     [  9,   5],

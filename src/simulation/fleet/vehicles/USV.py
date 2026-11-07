@@ -9,7 +9,7 @@ from src.autonomy.brain import USV_brain
 
 
 class USV:
-    def __init__(self, id:str, x0:float = 0, y0:float = 0, psi_rad0:float = 0, 
+    def __init__(self, id:str, x0:float = None, y0:float = None, psi_rad0:float = 0, 
                  mission_info:dict={}, terrain=None):
 
         self.usv_lock = threading.Lock()
@@ -20,9 +20,14 @@ class USV:
         self._type = "USV"
         self.max_speed = 6 # m/s
         self.lenght = 2
-        self._x = x0
-        self._y = y0
-        self._psi_rad = psi_rad0
+        if x0 is not None:
+            self._x = x0
+            self._y = y0
+            self._psi_rad = psi_rad0
+        else:
+            self._x = self.terrain.spawn[0]
+            self._y = self.terrain.spawn[1]
+            self._psi_rad = psi_rad0
         self._Ul = 0
         self._Ur = 0
 
@@ -33,7 +38,8 @@ class USV:
         self.do  = USV_brain(ardu = self.fake_ardu,
                              gps = self.fake_gps, 
                              imu = self.fake_imu,
-                             mission_info = mission_info)
+                             mission_info = mission_info,
+                             max_speed = self.max_speed)
 
 
     @property
