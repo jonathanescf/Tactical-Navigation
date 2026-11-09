@@ -6,6 +6,7 @@ import numpy as np
 from src.autonomy.utils import *
 from src.orchestration.config import parameters
 from src.autonomy.guidance.guidance import USV_Guidance
+from src.autonomy.guidance.global_planner import *
 from src.autonomy.control import USV_Control
 from src.autonomy.navigation import USV_Navigation
 from src.autonomy.mission import USV_Mission
@@ -13,7 +14,7 @@ from src.autonomy.mission import USV_Mission
 
 
 class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
-    def __init__(self, ardu, gps, imu, mission_info, max_speed): #no need to tell the type for dependancy purpose. 
+    def __init__(self, ardu, gps, imu, mission_info, max_speed, world_model): #no need to tell the type for dependancy purpose. 
                                         # USV_brain just communicates with the objects given without knowing what they are
         self.ardu = ardu
         self.gps = gps

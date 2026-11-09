@@ -9,3 +9,16 @@
 -   Ajouter une serie d unit tests pour chaque features. (apres une 1ere version satisfaisante)
 
 - ajouter le state a usv brain et differencier, le vrai state de USV et celui de USV brain . trouver une cnvention
+
+
+
+look terrain based navigation
+partical filter
+magnetic SLAM localization
+gravymetric
+davide faconti
+
+
+
+
+PLOT TERRAIN AND WORLD MODEL, MAKE THE DECISION LAYER, LISTEN TO CLAUDE TO IMPORVE WORLDMODEL file
