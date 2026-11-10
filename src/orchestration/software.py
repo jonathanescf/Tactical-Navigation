@@ -18,7 +18,7 @@ class software:
 
         scenario_info = load_scenario(path_scenario)
         self.terrain = build_terrain(scenario_info)
-        self.world_model = world_model(self.terrain)
+        self.world_model = world_model(self.terrain, precision = 5)
         self.mission_info = build_mission(scenario_info)
  
 

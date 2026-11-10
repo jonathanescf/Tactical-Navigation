@@ -1,0 +1,24 @@
+name = "A_star"
+
+[terrain]
+bounds = [-200, 200, -200, 200]    # x_min, x_max, y_min, y_max (arène de 100 m x 100 m)
+base_size = [20, 20]           # largeur, hauteur de l'encoche (m)
+
+
+# Obstacles: x, y, r (m)
+circles = []
+rectangles = [
+    # mur bas : y de -72 à -68, passage à GAUCHE (x < -120)
+    [[-120, -72], [200, -72], [200, -68], [-120, -68]],
+
+    # mur haut : y de 68 à 72, passage à DROITE (x > 120)
+    [[-200, 68], [120, 68], [120, 72], [-200, 72]],
+]
+[mission]
+type = "a_star"
+
+arrival_radius = 2 # validation distance for a waypoint
+
+waypoints = [
+    [  150, -150],
+]

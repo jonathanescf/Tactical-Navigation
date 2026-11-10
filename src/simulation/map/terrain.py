@@ -31,9 +31,11 @@ class terrain:
         return self.field(x,y)
 
     def is_free(self, x, y):
-        is_inside = (self.bounds[0] < x < self.bounds[1] and 
-                     self.bounds[2] < y < self.bounds[3])
-        return is_inside and self.distance(x, y) > 0
+        x0, x1, y0, y1 = self.bounds
+        bw, bh = self.base_size
+        in_arena = x0 < x < x1 and y0 < y < y1
+        in_base = x0 - bw <= x <= x0 and y1 - bh <= y <= y1
+        return (in_arena or in_base) and self.distance(x, y) > 0
 
     def gradient(self, x, y):
         """gradient normalized: opposite direction of closest obstacle"""

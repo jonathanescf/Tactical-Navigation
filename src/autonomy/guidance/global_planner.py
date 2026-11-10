@@ -30,7 +30,7 @@ def A_star(cost_map:np.ndarray, start_ind:tuple, goal_ind:tuple, blocked_thresho
     def reconstructed_path(current_ind):
         path = []
         while current_ind is not None:
-            path.append(current_ind)
+            path.append(tuple(map(int, current_ind))) # conversion from np.int64 to int
             current_ind = parent_dict[current_ind]
         return path[::-1]
 

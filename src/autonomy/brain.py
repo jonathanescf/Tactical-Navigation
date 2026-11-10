@@ -25,6 +25,7 @@ class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
         self.wp_index = 0
 
     def target_reached(self):
+        print(self.wp_index)
         self.wp_index += 1
 
     def next_target(self):
@@ -35,9 +36,9 @@ class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
     def brain_step(self):
         nav_state = self.get_nav_state()
         self.ongoing_target_state = self.next_target()
-
         if self.ongoing_target_state is None:
             self.ardu.send_arduino_cmd_motor(0, 0)
+            print("none")
             return
 
         Ul, Ur, TargetIntercepted = self.go_to_waypoint_step(nav_state, self.ongoing_target_state, self.dict_obstacles, interception_accuracy=self.arrival_radius)

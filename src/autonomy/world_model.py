@@ -5,7 +5,7 @@ from src.simulation.map.terrain import terrain
 
 
 class world_model:
-    def __init__(self, terrain, precision = 0.5):
+    def __init__(self, terrain, precision = 1):
         self.global_precision = precision
         self.gridmap = self.build_gridmap(terrain)
         self.costmap = self.build_costmap(terrain)
@@ -56,14 +56,11 @@ class world_model:
         ax.imshow(costmap, extent=extent, cmap="gray_r", origin="upper", vmin=0, vmax=255)
         ax.set_title(f"World model (res = {res} m)")
 
-        if path:
-            pts = gm[[i for i, _ in path], [j for _, j in path]]   # (N, 2)
+        if path is not None and len(path) > 0:
+            pts = np.asarray(path)          # (N, 2) en mètres
             ax.plot(pts[:, 0], pts[:, 1], "r-o", linewidth=2, markersize=3)
             ax.plot(*pts[0],  "go", markersize=9, label="départ")
             ax.plot(*pts[-1], "b*", markersize=14, label="but")
-            ax.legend()
-            if cost is not None:
-                ax.set_title(f"World model (res = {res} m), coût A* = {cost:.2f} ({len(path)} cellules)")
 
         ax.set_aspect("equal")
         ax.set_xlabel("x [m]")
