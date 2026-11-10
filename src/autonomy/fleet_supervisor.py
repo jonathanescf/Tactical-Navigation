@@ -44,7 +44,6 @@ class supervisor:
                 wp_goal = self.mission_info["waypoints"][-1]
                 path = self.generate_global_path(asset_id,wp_goal)
 
-
                 asset = self.asset_dict[asset_id]
                 asset.do.waypoints = path
                 asset.do.arrival_radius = self.mission_info["arrival_radius"]
