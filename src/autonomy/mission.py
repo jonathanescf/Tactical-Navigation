@@ -1,8 +1,7 @@
 import time
 import numpy as np
 from src.autonomy.utils import *
-from src.orchestration.config import parameters
-
+from src.autonomy.guidance.global_planner import *
 
 class USV_Mission():
 
@@ -43,3 +42,9 @@ class USV_Mission():
             return Ul, Ur, False
         else:
             return 0, 0, True
+
+
+
+    
+
+    

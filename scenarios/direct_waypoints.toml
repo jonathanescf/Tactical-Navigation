@@ -1,4 +1,4 @@
-name = "Obstacle avoidance"
+name = "Direct Waypoints"
 
 [terrain]
 bounds = [-25, 25, -25, 25]    # x_min, x_max, y_min, y_max (arène de 100 m x 100 m)
@@ -10,6 +10,8 @@ circles = []
 rectangles = []
 
 [mission]
+type = "go to waypoints"
+
 arrival_radius = 0.25 # validation distance for a waypoint
 
 waypoints = [

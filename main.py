@@ -5,7 +5,7 @@ from src.orchestration.config import parameters
 
 
 def main():
-    path_scenario = "scenarios/obstacle_avoidance.toml"
+    path_scenario = "scenarios/direct_waypoints.toml"
     tactical_nav = software(parameters, path_scenario)
 
 

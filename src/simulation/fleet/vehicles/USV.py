@@ -10,7 +10,7 @@ from src.autonomy.brain import USV_brain
 
 class USV:
     def __init__(self, id:str, x0:float = None, y0:float = None, psi_rad0:float = 0, 
-                 mission_info:dict={}, terrain=None):
+                 terrain=None):
 
         self.usv_lock = threading.Lock()
 
@@ -38,7 +38,6 @@ class USV:
         self.do  = USV_brain(ardu = self.fake_ardu,
                              gps = self.fake_gps, 
                              imu = self.fake_imu,
-                             mission_info = mission_info,
                              max_speed = self.max_speed)
 
 

@@ -1,12 +1,10 @@
 ### In this script, I add the different methods to allow the USV to fulfill its different missions.
 ### For now, a simple script is efficient, a better architecture/factorization might be needed for more complex algorithms.
 
-import time
-import numpy as np
+
 from src.autonomy.utils import *
-from src.orchestration.config import parameters
+
 from src.autonomy.guidance.guidance import USV_Guidance
-from src.autonomy.guidance.global_planner import *
 from src.autonomy.control import USV_Control
 from src.autonomy.navigation import USV_Navigation
 from src.autonomy.mission import USV_Mission
@@ -14,16 +12,16 @@ from src.autonomy.mission import USV_Mission
 
 
 class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
-    def __init__(self, ardu, gps, imu, mission_info, max_speed, world_model): #no need to tell the type for dependancy purpose. 
+    def __init__(self, ardu, gps, imu, max_speed): #no need to tell the type for dependancy purpose. 
                                         # USV_brain just communicates with the objects given without knowing what they are
         self.ardu = ardu
         self.gps = gps
         self.imu = imu
         self.max_speed = max_speed
-        self.ongoing_target_state = None, None, None, None
-        self.waypoints = mission_info["waypoints"]
-        self.arrival_radius = mission_info["arrival_radius"]
-        self.dict_obstacles = parameters["dict_of_obstacles"]
+        self.ongoing_target_state = None
+        self.waypoints = []
+        self.arrival_radius = None
+        self.dict_obstacles = None
         self.wp_index = 0
 
     def target_reached(self):

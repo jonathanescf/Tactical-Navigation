@@ -1,14 +1,15 @@
--   Ameliorer la map
+
+
+
+
 -   Bruiter la partie driver puis ameliorer la partie navigation avec un filtre de kalman
--   Ameliorer l input de mission (quelque chose de plus elabore qu un fichier config)
--   Implementer un global planner
 -   adapter graphical interface pour qui recevoir les inputs de l utilisateur, 
     et un layer decision global qui adapte les inputs en mission local pour chaque asset 
     et une fsm pour chaque type d asset permeetant leur autonomie totale en attendant la mission
 
 -   Ajouter une serie d unit tests pour chaque features. (apres une 1ere version satisfaisante)
 
-- ajouter le state a usv brain et differencier, le vrai state de USV et celui de USV brain . trouver une cnvention
+- ajouter le state a usv brain et differencier, le vrai state de USV et celui de USV brain. trouver une convention
 
 
 
@@ -17,7 +18,6 @@ partical filter
 magnetic SLAM localization
 gravymetric
 davide faconti
-
 
 
 

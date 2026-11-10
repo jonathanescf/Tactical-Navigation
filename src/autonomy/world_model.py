@@ -19,7 +19,7 @@ class world_model:
         X = np.arange(x0, x1, self.global_precision)
         Y = np.arange(y0, y1, self.global_precision)
 
-        map_x, map_y = np.meshgrid(X, Y[::-1])
+        map_x, map_y = np.meshgrid(X, Y[::-1]) # That way the gridmad and returns coords with X going right and Y going up
         gridmap = np.stack((map_x, map_y), axis=-1)
         return gridmap
 
@@ -33,7 +33,44 @@ class world_model:
                     costmap[i,j]= 255
         return costmap
 
+    def get_ind_from_coord(self, x, y):
+        i_max, j_max, _ = np.shape(self.gridmap)
+        x0, y0 = self.gridmap[-1, 0]
+        j = int(round((x - x0) / self.global_precision))
+        k = int(round((y - y0) / self.global_precision))
+        i = i_max - 1 - k # Y axis inverted wr to i (Y[::-1])
+        if 0 <= i < i_max and 0 <= j < j_max:
+            return i, j
+        return None
 
+    def plot_world_model(self, path=None, cost=None):
+        gm = self.gridmap
+        res = self.global_precision
+        costmap = self.costmap
+
+        x_left,  y_top    = gm[0, 0]
+        x_right, y_bottom = gm[-1, -1]
+        extent = [x_left - res/2, x_right + res/2, y_bottom - res/2, y_top + res/2]
+
+        fig, ax = plt.subplots(figsize=(7, 7))
+        ax.imshow(costmap, extent=extent, cmap="gray_r", origin="upper", vmin=0, vmax=255)
+        ax.set_title(f"World model (res = {res} m)")
+
+        if path:
+            pts = gm[[i for i, _ in path], [j for _, j in path]]   # (N, 2)
+            ax.plot(pts[:, 0], pts[:, 1], "r-o", linewidth=2, markersize=3)
+            ax.plot(*pts[0],  "go", markersize=9, label="départ")
+            ax.plot(*pts[-1], "b*", markersize=14, label="but")
+            ax.legend()
+            if cost is not None:
+                ax.set_title(f"World model (res = {res} m), coût A* = {cost:.2f} ({len(path)} cellules)")
+
+        ax.set_aspect("equal")
+        ax.set_xlabel("x [m]")
+        ax.set_ylabel("y [m]")
+        plt.tight_layout()
+        plt.show()
+        
 
 
 if __name__ == "__main__":
@@ -42,6 +79,9 @@ if __name__ == "__main__":
     class Terrain:
         bounds = (-1, 1, 0, 3)
         base_size = (1, 1)
+
+        def is_free(self, x, y):
+            return True
 
     terrain = Terrain()
 
