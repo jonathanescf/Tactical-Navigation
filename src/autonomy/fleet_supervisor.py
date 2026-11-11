@@ -53,7 +53,7 @@ class supervisor:
             if self.asset_init == True:
                 asset = self.asset_dict[asset_id]
                 asset.do.brain_step()
-    pass
+        return
 
                     
 

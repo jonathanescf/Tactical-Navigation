@@ -23,5 +23,6 @@ class USV_Control:
 
         Ul  = U_sum_feedforward + U_sum_feedback - U_diff_feedback
         Ur  = U_sum_feedforward + U_sum_feedback + U_diff_feedback
-
+        if Ul<0 or Ur<0:
+            print("Warning: negative motor command, the USV will not move. Check the controller gains and the max_speed parameter.")
         return Ul, Ur

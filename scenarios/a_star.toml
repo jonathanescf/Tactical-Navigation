@@ -1,7 +1,7 @@
 name = "A_star"
 
 [terrain]
-bounds = [-200, 200, -200, 200]    # x_min, x_max, y_min, y_max (arène de 100 m x 100 m)
+bounds = [-200, 200, -200, 200]    # x_min, x_max, y_min, y_max
 base_size = [20, 20]           # largeur, hauteur de l'encoche (m)
 
 

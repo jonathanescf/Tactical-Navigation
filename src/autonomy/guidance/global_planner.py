@@ -79,7 +79,7 @@ def A_star(cost_map:np.ndarray, start_ind:tuple, goal_ind:tuple, blocked_thresho
 
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # a mettre dans un dossier test
 
     X = 255  # obstacle
     map_test = np.array([

@@ -11,6 +11,7 @@ class USV_Navigation:
         return -np.arctan2(mag[1], mag[0])
     
     #TODO: Implémentez un filtre de kalman sur l'imu et le gps pour estimer la vitesse du bateau
+    #TODO! major flaw: the speed should only found from the sensors. K is not supposed to be knonw.
     def current_speed(self)->float:
         """
         The speed is taken from the motor command, K is given to have an exact estimate. This is ideal and should be changed.
@@ -25,7 +26,7 @@ class USV_Navigation:
         Function to get the current latitude and longitude of the USV using the GPS. 
         The unit is in decimal degrees. 
         """
-        msg, val = self.gps.read_gll_non_busv_locking()
+        msg, val = self.gps.read_gll_non_blocking()
         if msg:
             lat = nmea_to_decimal(val[0])   
             lon = nmea_to_decimal(val[2])

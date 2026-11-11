@@ -1,7 +1,7 @@
 
 
 
-
+- mettre de l'inertie a la modelisation du robot. plus la modelisation est relle, plus les faiblesses du controleurs devraient apparaitre
 -   Bruiter la partie driver puis ameliorer la partie navigation avec un filtre de kalman
 -   adapter graphical interface pour qui recevoir les inputs de l utilisateur, 
     et un layer decision global qui adapte les inputs en mission local pour chaque asset 

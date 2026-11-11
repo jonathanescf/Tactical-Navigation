@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from src.simulation.map.terrain import terrain
 
 
 
@@ -43,7 +42,7 @@ class world_model:
             return i, j
         return None
 
-    def plot_world_model(self, path=None, cost=None):
+    def plot_world_model(self, path=None):
         gm = self.gridmap
         res = self.global_precision
         costmap = self.costmap

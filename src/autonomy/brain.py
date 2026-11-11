@@ -2,8 +2,6 @@
 ### For now, a simple script is efficient, a better architecture/factorization might be needed for more complex algorithms.
 
 
-from src.autonomy.utils import *
-
 from src.autonomy.guidance.guidance import USV_Guidance
 from src.autonomy.control import USV_Control
 from src.autonomy.navigation import USV_Navigation
@@ -21,7 +19,6 @@ class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
         self.ongoing_target_state = None
         self.waypoints = []
         self.arrival_radius = None
-        self.dict_obstacles = None
         self.wp_index = 0
 
     def target_reached(self):
@@ -38,10 +35,9 @@ class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
         self.ongoing_target_state = self.next_target()
         if self.ongoing_target_state is None:
             self.ardu.send_arduino_cmd_motor(0, 0)
-            print("none")
             return
 
-        Ul, Ur, TargetIntercepted = self.go_to_waypoint_step(nav_state, self.ongoing_target_state, self.dict_obstacles, interception_accuracy=self.arrival_radius)
+        Ul, Ur, TargetIntercepted = self.go_to_waypoint_step(nav_state, self.ongoing_target_state, interception_accuracy=self.arrival_radius)
         self.ardu.send_arduino_cmd_motor(Ul, Ur)
 
         if TargetIntercepted:

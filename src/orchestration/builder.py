@@ -21,11 +21,6 @@ def build_mission(scenario_info:dict):
     mission_info["waypoints"] = [tuple(wpt) for wpt in mission_info["waypoints"]]
     return mission_info
 
-
-def plot_scenario():
-    pass
-
-
 if __name__== "__main__":
 
     path = "scenarios/obstacle_avoidance.toml"

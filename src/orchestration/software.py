@@ -1,7 +1,5 @@
 import threading
 import time
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 from src.orchestration.builder import *
@@ -18,12 +16,12 @@ class software:
 
         scenario_info = load_scenario(path_scenario)
         self.terrain = build_terrain(scenario_info)
-        self.world_model = world_model(self.terrain, precision = 5)
+        self.world_model = world_model(self.terrain, precision = 15)
         self.mission_info = build_mission(scenario_info)
  
 
         # Create instances of the main classes
-        self.simulator = simulator(self.parameters, self.mission_info, self.terrain)
+        self.simulator = simulator(self.parameters, self.terrain)
         self.supervisor = supervisor(self.world_model, self.mission_info, self.simulator.dict_of_assets)
 
         self.graphical_interface = graphical_interface(self.parameters, 
@@ -59,6 +57,7 @@ class software:
         """
         list_assets_states = []
         for asset in self.simulator.list_of_assets:
+            x, y, psi_rad, Ul, Ur = asset.get_space_state()
             if asset.do.ongoing_target_state is None:
                 ongoing = None
             else:
@@ -66,9 +65,11 @@ class software:
                            "y": asset.do.ongoing_target_state[1]}
             list_assets_states.append({"id": asset.id,
                                        "type": asset.type,
-                                       "pose": {"x": asset.x,
-                                                "y": asset.y,
-                                                "psi_rad": asset.psi_rad},
+                                       "pose": {"x": x,
+                                                "y": y,
+                                                "psi_rad": psi_rad},
+                                        "motor_commands": {"Ul": Ul,
+                                                           "Ur": Ur},
                                         "ongoing_target": ongoing})
 
         return {"time": t_s,

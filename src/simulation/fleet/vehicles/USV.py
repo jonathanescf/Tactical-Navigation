@@ -42,16 +42,6 @@ class USV:
 
 
     @property
-    def id(self):
-        with self.usv_lock:
-            return self._id
-
-    @property
-    def type(self):
-        with self.usv_lock:
-            return self._type
-
-    @property
     def x(self):
         with self.usv_lock:
             return self._x
@@ -101,6 +91,10 @@ class USV:
         with self.usv_lock:
             self._Ur = value
 
+    def get_space_state(self):
+        with self.usv_lock:
+            return self._x, self._y, self._psi_rad, self._Ul, self._Ur
+
     def physic_step(self, dt:float):
         """
         Used to update the USV state using physics equations.
@@ -120,8 +114,8 @@ class USV:
             if self.terrain.distance(x_new, y_new) < 0:
                 print("WARNING: COLLISION WITH AN OBSTACLE")
                 self._psi_rad  = (self._psi_rad + omega * dt + np.pi) % (2 * np.pi) 
-                self._x = x_new
-                self._y = y_new
+                self._x = 0
+                self._y = 0
 
             else:
                 self._x = x_new

@@ -19,7 +19,7 @@ class fake_USV_gps():
         m = (abs(deg) - d) * 60
         return d * 100 + m
     
-    def read_gll_non_busv_locking(self)->tuple[bool,list[float,str,float,str]]:
+    def read_gll_non_blocking(self)->tuple[bool,list[float,str,float,str]]:
         """
         this function simulates the reading of the GPS data in NMEA format. Returns the latitude and longitude in NMEA format. The bool depicts the quality of the message, which is always good in this simulation. The altitude is set to 0.0 for now.
         """
