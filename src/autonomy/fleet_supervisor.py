@@ -3,7 +3,7 @@ from src.autonomy.guidance.global_planner import *
 
 
 class supervisor:
-    def __init__(self, world_grid, mission_info, brains):
+    def __init__(self, world_grid, brains, mission_info):
         self.world_grid = world_grid
         self.mission_info = mission_info
         self.brains = brains

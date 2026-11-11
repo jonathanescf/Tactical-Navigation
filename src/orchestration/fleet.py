@@ -11,7 +11,7 @@ class fleet:
         self.dict_of_assets = dict_of_assets
         self.bodies = dict((asset.id, asset.usv_body) for asset in self.dict_of_assets.values())
         self.brains = dict((asset.id, asset.usv_brain) for asset in self.dict_of_assets.values())
-    
+
 
 @dataclass
 class USV_system:
@@ -22,4 +22,3 @@ class USV_system:
     usv_gnss: fake_USV_gps
     usv_imu: fake_USV_imu
     usv_motor:fake_USV_ardu
-    
