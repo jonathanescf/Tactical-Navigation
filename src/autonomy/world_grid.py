@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 
-class world_model:
+class world_grid:
     def __init__(self, terrain, precision = 1):
         self.global_precision = precision
         self.gridmap = self.build_gridmap(terrain)
@@ -42,7 +42,7 @@ class world_model:
             return i, j
         return None
 
-    def plot_world_model(self, path=None):
+    def plot_world_grid(self, path=None):
         gm = self.gridmap
         res = self.global_precision
         costmap = self.costmap
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     terrain = Terrain()
 
     # Create world model
-    world = world_model(precision=1.0, terrain=terrain)
+    world = world_grid(precision=1.0, terrain=terrain)
 
     gridmap = world.gridmap
 

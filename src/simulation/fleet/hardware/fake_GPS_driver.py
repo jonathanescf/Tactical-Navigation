@@ -9,7 +9,6 @@ class fake_USV_gps():
         This class simulates the gps sensor. It takes the USV state and converts the x y coordinates to latitude and longitude. It serves as an intermediate between the USV physics and the navigation algorithms that use GPS data.
         """
         self.USV = USV
-        print(f'Init GNSS for USV {self.USV._id}...')
 
     def _to_nmea(self, deg:float)->float:
         """

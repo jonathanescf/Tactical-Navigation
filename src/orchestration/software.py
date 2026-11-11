@@ -4,40 +4,50 @@ import time
 
 from src.orchestration.builder import *
 from src.graphics.graphical_interface import graphical_interface
-from src.simulation.simulator import simulator
-from src.autonomy.world_model import world_model
+from src.autonomy.world_grid import world_grid
 from src.autonomy.fleet_supervisor import supervisor
 
-class software:
+def software(parameters:dict, path_scenario):
+    scenario = load_scenario(path_scenario)
+    mission = build_mission(scenario)
+
+    terrain = build_terrain(scenario)
+    world_grid = world_grid(terrain, precision = 15)
+
+    fleet = build_fleet(parameters, terrain)
+    simulator = simulator(terrain, fleet.bodies, parameters["dt"])
+    supervisor = supervisor(world_grid, mission, fleet.brains)
 
     def __init__(self, parameters:dict, path_scenario):
         self.software_running = True
         self.parameters = parameters
 
-        scenario_info = load_scenario(path_scenario)
-        self.terrain = build_terrain(scenario_info)
-        self.world_model = world_model(self.terrain, precision = 15)
-        self.mission_info = build_mission(scenario_info)
+        scenario = load_scenario(path_scenario)
+        self.mission_info = build_mission(scenario)
+        self.terrain = build_terrain(scenario)
+        self.world_grid = world_grid(self.terrain, precision = 15)
+        
  
 
         # Create instances of the main classes
-        self.simulator = simulator(self.parameters, self.terrain)
-        self.supervisor = supervisor(self.world_model, self.mission_info, self.simulator.dict_of_assets)
+        self.fleet = build_fleet(self.parameters, self.terrain)
+        self.supervisor = supervisor(self.world_grid, self.mission_info, self.fleet.brains)
 
-        self.graphical_interface = graphical_interface(self.parameters, 
-                                                       get_static_snapshot = self.static_snapshot,
-                                                       get_dynamic_snapshot = self.dynamic_snapshot)
+        
         
         # Start everything in separate threads
         self.thread_mission_loop = threading.Thread(target=self.loop, daemon=True)
         self.thread_mission_loop.start()
-
+        
+        self.graphical_interface = graphical_interface(self.parameters, 
+                                                               get_static_snapshot = self.static_snapshot,
+                                                               get_dynamic_snapshot = self.dynamic_snapshot)
         self.graphical_interface.run()
 
     def loop(self):
         while self.software_running:
-            for asset in self.simulator.dict_of_assets.values():
-                asset.physic_step(self.parameters["dt"])
+            for asset_body in self.fleet.bodies.values():
+                asset_body.physic_step(self.parameters["dt"])
             self.supervisor.fulfill_mission()
             time.sleep(self.parameters["dt"])
 
@@ -56,13 +66,13 @@ class software:
         Creates a dict with the state of every asset at the instant it is called. Useful to record simulation logs and for visualization.
         """
         list_assets_states = []
-        for asset in self.simulator.list_of_assets:
-            x, y, psi_rad, Ul, Ur = asset.get_space_state()
-            if asset.do.ongoing_target_state is None:
+        for asset in self.fleet.dict_of_assets.values():
+            x, y, psi_rad, Ul, Ur = asset.usv_body.get_space_state()
+            if asset.usv_brain.ongoing_target_state is None:
                 ongoing = None
             else:
-                ongoing = {"x": asset.do.ongoing_target_state[0], 
-                           "y": asset.do.ongoing_target_state[1]}
+                ongoing = {"x": asset.usv_brain.ongoing_target_state[0], 
+                           "y": asset.usv_brain.ongoing_target_state[1]}
             list_assets_states.append({"id": asset.id,
                                        "type": asset.type,
                                        "pose": {"x": x,
