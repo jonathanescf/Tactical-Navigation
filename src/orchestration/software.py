@@ -22,7 +22,7 @@ class software:
         self.mission = build_mission(scenario)
         
         self.terrain = build_terrain(scenario)
-        self.world_grid = world_grid(self.terrain, precision = 5)
+        self.world_grid = world_grid(self.terrain, precision = 2.5)
         
 
         # Create instances of the main classes
@@ -46,7 +46,7 @@ class software:
             self.supervisor.fulfill_mission()
             self.simulator.global_physic_step()
             tf_tick = time.perf_counter()  # End the timer
-            time.sleep(self.parameters["dt"] - (tf_tick - ti_tick))
+            time.sleep(max(0,self.parameters["dt"] - (tf_tick - ti_tick)))
 
     def static_snapshot(self, grid_n: int = 250) -> dict:
         # --- Terrain : SDF échantillonnée une seule fois ---
