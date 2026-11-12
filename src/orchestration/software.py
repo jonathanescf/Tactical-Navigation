@@ -22,7 +22,7 @@ class software:
         self.mission = build_mission(scenario)
         
         self.terrain = build_terrain(scenario)
-        self.world_grid = world_grid(self.terrain, precision = 2.5)
+        self.world_grid = world_grid(self.terrain, precision = 10)
         
 
         # Create instances of the main classes
