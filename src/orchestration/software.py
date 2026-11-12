@@ -1,76 +1,111 @@
 import threading
 import time
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 from src.orchestration.builder import *
 from src.graphics.graphical_interface import graphical_interface
-from src.simulation.simulator import simulator
-from src.autonomy.world_model import world_model
+from src.autonomy.world_grid import world_grid
 from src.autonomy.fleet_supervisor import supervisor
+from src.simulation.simulator import simulator
 
 class software:
-
     def __init__(self, parameters:dict, path_scenario):
+        self.initialize(parameters, path_scenario)
+    
+
+    def initialize(self, parameters:dict, path_scenario):
         self.software_running = True
         self.parameters = parameters
 
-        scenario_info = load_scenario(path_scenario)
-        self.terrain = build_terrain(scenario_info)
-        self.world_model = world_model(self.terrain, precision = 5)
-        self.mission_info = build_mission(scenario_info)
- 
+        scenario = load_scenario(path_scenario)
+        self.mission = build_mission(scenario)
+        
+        self.terrain = build_terrain(scenario)
+        self.world_grid = world_grid(self.terrain, precision = 10)
+        
 
         # Create instances of the main classes
-        self.simulator = simulator(self.parameters, self.mission_info, self.terrain)
-        self.supervisor = supervisor(self.world_model, self.mission_info, self.simulator.dict_of_assets)
+        self.fleet = build_fleet(self.parameters, self.terrain)
+        self.simulator = simulator(self.terrain, self.fleet.bodies, self.parameters["dt"])
+        self.supervisor = supervisor(self.world_grid, self.fleet.brains, self.mission)
 
-        self.graphical_interface = graphical_interface(self.parameters, 
-                                                       get_static_snapshot = self.static_snapshot,
-                                                       get_dynamic_snapshot = self.dynamic_snapshot)
         
         # Start everything in separate threads
-        self.thread_mission_loop = threading.Thread(target=self.loop, daemon=True)
-        self.thread_mission_loop.start()
-
+        self.backend_loop = threading.Thread(target=self.loop, daemon=True)
+        self.backend_loop.start()
+        
+        self.graphical_interface = graphical_interface(self.parameters, 
+                                                               get_static_snapshot = self.static_snapshot,
+                                                               get_dynamic_snapshot = self.dynamic_snapshot)
         self.graphical_interface.run()
 
     def loop(self):
         while self.software_running:
-            for asset in self.simulator.dict_of_assets.values():
-                asset.physic_step(self.parameters["dt"])
+            ti_tick = time.perf_counter()  # Start the timer
             self.supervisor.fulfill_mission()
-            time.sleep(self.parameters["dt"])
+            self.simulator.global_physic_step()
+            tf_tick = time.perf_counter()  # End the timer
+            time.sleep(max(0,self.parameters["dt"] - (tf_tick - ti_tick)))
 
-    def static_snapshot(self):
+    def static_snapshot(self, grid_n: int = 250) -> dict:
+        # --- Terrain : SDF échantillonnée une seule fois ---
+        x0, x1, y0, y1 = self.terrain.bounds
+        margin = max(self.terrain.base_size) + 10
+        xs = np.linspace(x0 - margin, x1 + margin, grid_n)
+        ys = np.linspace(y0 - margin, y1 + margin, grid_n)
+        XX, YY = np.meshgrid(xs, ys)
+        D = self.terrain.distance(XX, YY)
+
+        # --- Costmap : la grille discrète vue par le planificateur ---
+        gm = self.world_grid.gridmap                 # (i, j, 2), ligne 0 = haut (Y inversé)
+        res = self.world_grid.global_precision
+        x_left, y_top = gm[0, 0]
+        x_right, y_bottom = gm[-1, -1]
+
         return {
-            "bounds": self.terrain.bounds,
-            "base_size": self.terrain.base_size,
-            "waypoints": [{"id": i, "pose": {"x": x, "y": y}}
-                        for i, (x, y) in enumerate(self.mission_info["waypoints"], start=1)],
-            "terrain_distance": self.terrain.distance,  # a modifier lorsque le gui sera sur web 
-                                                        # (impossible de serialiser une fonction comme ca)
+            "name": self.mission.get("name"),
+            "bounds": list(self.terrain.bounds),
+            "base_size": list(self.terrain.base_size),
+            "arrival_radius": float(self.mission["arrival_radius"]),
+            "waypoints": [{"id": i, "x": float(x), "y": float(y)}
+                        for i, (x, y) in enumerate(self.mission["waypoints"], start=1)],
+            "terrain_grid": {"x": xs.tolist(), "y": ys.tolist(), "d": D.tolist()},
+            "costmap": {
+                "res": float(res),
+                "extent": [float(x_left - res / 2), float(x_right + res / 2),
+                        float(y_bottom - res / 2), float(y_top + res / 2)],
+                "cost": self.world_grid.costmap.tolist(),    # lignes de haut en bas
+            },
         }
 
-    def dynamic_snapshot(self, t_s):
-        """
-        Creates a dict with the state of every asset at the instant it is called. Useful to record simulation logs and for visualization.
-        """
-        list_assets_states = []
-        for asset in self.simulator.list_of_assets:
-            if asset.do.ongoing_target_state is None:
-                ongoing = None
-            else:
-                ongoing = {"x": asset.do.ongoing_target_state[0], 
-                           "y": asset.do.ongoing_target_state[1]}
-            list_assets_states.append({"id": asset.id,
-                                       "type": asset.type,
-                                       "pose": {"x": asset.x,
-                                                "y": asset.y,
-                                                "psi_rad": asset.psi_rad},
-                                        "ongoing_target": ongoing})
 
-        return {"time": t_s,
-                "dt" : self.parameters["dt"], 
-                "assets_state": list_assets_states}
+    def dynamic_snapshot(self) -> dict:
+        assets = []
+        for asset_id, body in self.fleet.bodies.items():
+            brain = self.fleet.brains[asset_id]
+
+            x, y, psi, Ul, Ur = body.get_space_state()
+            bx, by, bpsi, bv = brain.get_nav_state()
+            target = brain.ongoing_target_state
+
+            assets.append({
+                "id": asset_id,
+                "type": self.fleet.dict_of_assets[asset_id].type,
+                "truth": {
+                    "pose": {"x": float(x), "y": float(y), "psi_rad": float(psi)},
+                    "motor_commands": {"Ul": float(Ul), "Ur": float(Ur)},
+                },
+                "belief": {
+                    "estimated_pose": {"x": float(bx), "y": float(by), "psi_rad": float(bpsi)},
+                    "estimated_speed": float(bv),
+                    "ongoing_target": None if target is None
+                                    else {"x": float(target[0]), "y": float(target[1])},
+                    "path": [{"x": float(p[0]), "y": float(p[1])} for p in brain.waypoints],
+                    "path_index": int(brain.wp_index),
+                },
+            })
+
+        return {"time": float(self.simulator.t),
+                "dt": float(self.parameters["dt"]),
+                "assets": assets}

@@ -1,24 +1,53 @@
 
+TODO LIST:
+
+1. GLOBAL PATH PLANNING
+
+- Reduire le nombre de waypoints sans reduire la precision de world grid (et donc costmap)
+  (Peut etre utiliser le Recursive Shadow Casting  pour reduire le nombre de voisins a visiter?)
+- Lisser le path a l'aide des courbes de Bezier.
+- LOS sur la courbe lissee
+- Gamma value parametrization for trajectory planing by reducing crosstrack error with fictive target
+
+2. LOCAL PATH PLANNING
+
+- Creer un algorithme d'evitement d obstacle ajoutant un faux radar/lidar qui viendrait detecter les objets au alentours. peut etre creer une costmap local a partir de ces donnees?
+
+2. SOLVE DEPENDACY ISSUES TO ISOLATE AUTONOMY AND SIMULATION
+
+3. WEB BASED GUI
+
+- Creer une page de visualiation pour le front end qui communique en websocket avec le backend en prenant uniquement un snapshot serialise de l avancement de la simulation ainsi que la prise de decision de l autonomy.
+- Adapter l'interface pour qu'elle puisse prendre en compte les inputs de l'utilisateur (tres long terme)
+
+4. IMPROVE REAL LIFE CONDITION
+
+- Ameliorer l'equation physiques qui regissent le mouvement du robot pour qu elles incluent plus de dynamique en fonction du poids etc. avec de l inertie. Cela devrait faire apparaitre les faiblesses du controleur (a resoudre avec un meilleur algo de control -> PID etc).
+- Bruiter les driver en modelisant les defauts existants. cela devrait faire apparaitre des defauts dans la navigation (a resoudre avec des filtres -> EKF ou particle).
+
+5. DECISION LAYER
+
+-   Implementer une FSM pour l'USV afin q'il puisse enchainer les missions. ( prendre plusieurs waypoints a suivre avec A* grace au path envoyee par fleet supervisor, puis se ettre en state attente entre chaque par exemple. le fleet supervisor pourrait recuperer les states de chaque asset et en faire quelque chose)
+
+6. CI/CD
+
+- Ajouter une serie d'unit tests pour chaque features. (apres une 1ere version satisfaisante)
+
+7. README
+
+- Faire une documentation complete du projet, en passant en revue absoluement TOUT le code, 
+C'est egalement le moment de verifier les zones grises et factoriser!!!! 
 
 
+8. RAPPORT
 
--   Bruiter la partie driver puis ameliorer la partie navigation avec un filtre de kalman
--   adapter graphical interface pour qui recevoir les inputs de l utilisateur, 
-    et un layer decision global qui adapte les inputs en mission local pour chaque asset 
-    et une fsm pour chaque type d asset permeetant leur autonomie totale en attendant la mission
+Faire un rapport PDF complet avec image. a envoyer aux interviewers lors des job interviews
+Bien parler du role de Claude dans le projet. justifier les maths et choix logiques derriere le projet
 
--   Ajouter une serie d unit tests pour chaque features. (apres une 1ere version satisfaisante)
-
-- ajouter le state a usv brain et differencier, le vrai state de USV et celui de USV brain. trouver une convention
-
-
+100. ... IDEAS ...
 
 look terrain based navigation
 partical filter
 magnetic SLAM localization
 gravymetric
 davide faconti
-
-
-
-PLOT TERRAIN AND WORLD MODEL, MAKE THE DECISION LAYER, LISTEN TO CLAUDE TO IMPORVE WORLDMODEL file

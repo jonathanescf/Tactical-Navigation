@@ -1,7 +1,6 @@
-import time
 import numpy as np
 from src.autonomy.utils import *
-import matplotlib.pyplot as plt
+
 
 
 class USV_Guidance:
@@ -64,8 +63,6 @@ class USV_Guidance:
 
         return desired_heading, U_dict, k_obstacle_influence # 2nd and 3rd arguments for plotting purposes
 
-    def space_aware_heading(self):
-        pass
 
     def get_desired_speed(self, x_USV:float, y_USV:float, 
                                x_target:float, y_target:float):
@@ -79,8 +76,7 @@ class USV_Guidance:
         return desired_speed
 
     def get_desired_heading(self, x_USV, y_USV, 
-                                  x_target, y_target, 
-                                  dict_obstacles=None):
+                                  x_target, y_target):
         # desired_heading, U_dict, k_obstacle_influence = self.vector_field(x_USV, y_USV, x_target, y_target, dict_obstacles)
         desired_heading = self.direct_waypoints(x_USV, y_USV, x_target, y_target)
         return desired_heading

@@ -8,7 +8,6 @@ class fake_USV_imu:
         This is a fake IMU driver that simulates magnetometer readings based on the USV's heading (psi).
         """
         self.USV = USV
-        print(f'Init IMU for USV {self.USV._id}...')
 
     def read_mag_raw(self)->list[float,float,float]:
         """

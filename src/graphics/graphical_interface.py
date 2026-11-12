@@ -1,153 +1,179 @@
-
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import matplotlib.patches as patches
+from collections import deque
 from typing import Callable
+
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+
+ARROW_LEN = 2.0
+TRAIL_LEN = 2000
+
+BG_FIG      = "#0b1320"
+BG_AXES     = "#16263a"
+OBSTACLE    = "#ff5252"
+OBSTACLE_ED = "#ffffff"
+WAYPOINT    = "#e0e0e0"
+TARGET      = "#ffea00"
+TEXT        = "#e6edf3"
+ASSET_COLORS = ["#00e5ff", "#ff4081", "#b388ff", "#69f0ae", "#ff9100"]
+
+# coût 0 = eau libre (même couleur que le fond), 255 = bloqué. Reste lisible quand la costmap sera graduée.
+COST_CMAP = LinearSegmentedColormap.from_list("cost", [BG_AXES, "#ffd54f", OBSTACLE])
+
+
+def _tail(pose: dict, length: float = ARROW_LEN) -> tuple[float, float]:
+    return (pose["x"] - np.cos(pose["psi_rad"]) * length,
+            pose["y"] - np.sin(pose["psi_rad"]) * length)
 
 
 class graphical_interface:
-    def __init__(self, parameters:dict, 
-                 get_static_snapshot:Callable[[], dict] = None,
-                 get_dynamic_snapshot:Callable[[float], dict] = None):
-        
+    def __init__(self, parameters: dict,
+                 get_static_snapshot: Callable[[], dict],
+                 get_dynamic_snapshot: Callable[[], dict]):
         self.dt = parameters["dt"]
         self.get_static_snapshot = get_static_snapshot
         self.get_dynamic_snapshot = get_dynamic_snapshot
-        print(f'Init Graphical Interface ...')
-        print("--------------------")
-        self.setup()          
+        self.artists: dict[str, dict] = {}
+        self.setup()
 
+    # ------------------------------------------------------------ setup
     def setup(self):
-        self.setup_display_graphics() 
-        self.setup_USVs_graphics()
-        self.setup_map_graphics()
+        self.setup_display()
+        self.setup_map()
+        self.setup_assets()
 
-    def setup_display_graphics(self):
-        """
-        sets up the window page for the simulation
-        """
-        self.fig, self.ax = plt.subplots(figsize=(7, 7))
-        self.ax.set_xlim(-300,300)
-        self.ax.set_ylim(-300,300)
-        self.ax.set_aspect('equal')
-        self.ax.set_facecolor("#22272c")
-        self.ax.set_title("DDBoat Simulation", color='white', fontsize=12, pad=10)
-        self.ax.tick_params(colors='#aaaaaa')
-        self.ax.grid(True, linestyle='--', alpha=0.2, color='white')
-        self.fig.patch.set_facecolor('#0d1b2a')
+    def setup_display(self):
+        self.fig, (self.ax_terrain, self.ax_cost) = plt.subplots(
+            1, 2, figsize=(17, 7), sharex=True, sharey=True)   # mêmes limites, zoom synchronisé
+        self.fig.patch.set_facecolor(BG_FIG)
+        self.axes = (self.ax_terrain, self.ax_cost)
+        for ax in self.axes:
+            ax.set_facecolor(BG_AXES)
+            ax.set_aspect("equal", adjustable="box")
+            ax.tick_params(colors=TEXT)
+            for s in ax.spines.values():
+                s.set_color("#4a5a70")
+            ax.grid(True, linestyle="--", alpha=0.25, color="white")
+        self.title = self.fig.suptitle("", color=TEXT, fontsize=12)
 
+    def setup_map(self):
+        snap = self.get_static_snapshot()
+        x0, x1, y0, y1 = snap["bounds"]
+        margin = max(snap["base_size"]) + 10
 
-    def setup_USVs_graphics(self):
-        """
-        sets up the USV representation in the simulation
-        """
-        self.arrows = {}
-        list_assets_states = self.get_dynamic_snapshot(0)["assets_state"]
-        for asset_usv in list_assets_states:
-            x, y, psi_rad = asset_usv["pose"]["x"], asset_usv["pose"]["y"], asset_usv["pose"]["psi_rad"]
-            self.arrows[asset_usv["id"]] = self.ax.annotate(
-                '',
-                xy=(x, y),                                                    # pointe = position du bateau
-                xytext=(x - np.cos(psi_rad) * 2.0,                   # queue = derrière le bateau
-                        y - np.sin(psi_rad) * 2.0),
-                arrowprops=dict(
-                    arrowstyle='->', color='#f5c518',
-                    lw=2.5,
-                    mutation_scale=20,
-                ),
-            )
+        # --- Vue 1 : terrain continu (SDF échantillonnée) ---
+        g = snap["terrain_grid"]
+        xs, ys, d = np.asarray(g["x"]), np.asarray(g["y"]), np.asarray(g["d"])
+        self.ax_terrain.contourf(xs, ys, d, levels=[-1e9, 0], colors=[OBSTACLE], alpha=0.85, zorder=3)
+        self.ax_terrain.contour(xs, ys, d, levels=[0], colors=OBSTACLE_ED, linewidths=1.2, zorder=3)
+        self.ax_terrain.set_title("Terrain (SDF)", color=TEXT, fontsize=10)
 
-            # légende
-            for i in range(1, len(list_assets_states) + 1):
-                self.ax.plot([], [], color='#f5c518', label=f'usv asset {i}')
-            if len(list_assets_states)  > 0:
-                self.ax.legend(loc='upper right', facecolor='#1a2a3a',
-                            labelcolor='white', fontsize=8)
+        # --- Vue 2 : costmap discrète, telle que A* la voit ---
+        c = snap["costmap"]
+        self.ax_cost.imshow(np.asarray(c["cost"]), extent=c["extent"], origin="upper",
+                            cmap=COST_CMAP, vmin=0, vmax=255,
+                            interpolation="nearest", zorder=1)   # nearest : on veut voir les cases
+        self.ax_cost.set_title(f'Costmap (résolution {c["res"]:g} m)', color=TEXT, fontsize=10)
 
-    def setup_map_graphics(self):
-        """
-        Sets up the static map elements (drawn once) and the containers
-        for the dynamic ones (created on demand in update_map).
-        """
-        self.target_plots = {}
+        # --- Waypoints sur les deux vues ---
+        for ax in self.axes:
+            for wp in snap["waypoints"]:
+                ax.plot(wp["x"], wp["y"], "o", color=WAYPOINT, markersize=7,
+                        markeredgecolor="black", zorder=4)
+                ax.annotate(str(wp["id"]), (wp["x"], wp["y"]), textcoords="offset points",
+                            xytext=(6, 6), color=TEXT, fontsize=9, fontweight="bold", zorder=4)
 
-        map_elements = self.get_static_snapshot()
-        x0, x1, y0, y1 = map_elements["bounds"]
-        margin = max(map_elements["base_size"]) + 10                               # laisse voir l'encoche qui dépasse de bounds
+        self.ax_terrain.set_xlim(x0 - margin, x1 + margin)     # axes partagés : règle les deux
+        self.ax_terrain.set_ylim(y0 - margin, y1 + margin)
+        self.scenario_name = snap.get("name") or ""
 
-        # --- Terrain : le champ est évalué UNE fois sur une grille d'écran ---
-        xs = np.linspace(x0 - margin, x1 + margin, 500)
-        ys = np.linspace(y0 - margin, y1 + margin, 500)
-        XX, YY = np.meshgrid(xs, ys)
-        D = map_elements["terrain_distance"](XX, YY)
+    def _make_artists(self, ax, color: str, pose: dict) -> dict:
+        """Un jeu d'artistes pour un asset sur UN axe."""
+        arrow = ax.annotate("", xy=(pose["x"], pose["y"]), xytext=_tail(pose), zorder=7,
+                            arrowprops=dict(arrowstyle="-|>", color=color, lw=3, mutation_scale=22))
+        trail, = ax.plot([], [], "-", color=color, lw=1.8, alpha=0.7, zorder=5)
+        path, = ax.plot([], [], "--", color=color, lw=1.5, alpha=0.9, zorder=5)
+        estimate, = ax.plot([], [], "x", color="white", markersize=8, markeredgewidth=2, zorder=8)
+        target, = ax.plot([], [], "*", color=TARGET, markersize=16, markeredgecolor="black", zorder=8)
+        label = ax.annotate("", (0, 0), color=TARGET, fontsize=9, fontweight="bold", zorder=8)
+        return {"arrow": arrow, "trail": trail, "path": path,
+                "estimate": estimate, "target": target, "target_label": label}
 
-        self.ax.contourf(XX, YY, D, levels=[-1e9, 0], colors=["#aa3333"], zorder=3)   # obstacles et murs
-        self.ax.contour(XX, YY, D, levels=[0], colors="black", linewidths=1.5, zorder=3)  # bord
+    def setup_assets(self):
+        assets = self.get_dynamic_snapshot()["assets"]
+        for k, asset in enumerate(assets):
+            color = ASSET_COLORS[k % len(ASSET_COLORS)]
+            pose = asset["truth"]["pose"]
+            self.artists[asset["id"]] = {
+                "color": color,
+                "history": deque(maxlen=TRAIL_LEN),            # partagé entre les deux vues
+                "views": [self._make_artists(ax, color, pose) for ax in self.axes],
+            }
+        self.setup_legends(assets)
 
-        # --- Waypoints : statiques, dessinés une fois ---
-        for wp in map_elements["waypoints"]:
-            x, y = wp["pose"]["x"], wp["pose"]["y"]
-            self.ax.plot(x, y, "o", color="#888888", markersize=5, zorder=2)
-            self.ax.annotate(str(wp["id"]), (x, y), textcoords="offset points",
-                            xytext=(5, 5), color="#aaaaaa", fontsize=7)
+    def setup_legends(self, assets):
+        style = dict(facecolor="#1a2a3a", edgecolor="#4a5a70", labelcolor=TEXT, fontsize=8)
+        grey = "#9aa7b5"
+        ax = self.ax_cost          # légendes à droite de la 2e vue, hors carte
 
-        # --- Limites d'affichage : lues depuis le snapshot, plus codées en dur ---
-        self.ax.set_xlim(x0 - margin, x1 + margin)
-        self.ax.set_ylim(y0 - margin, y1 + margin)
+        symbols = [
+            Patch(facecolor=OBSTACLE, edgecolor=OBSTACLE_ED, label="Obstacle / case bloquée"),
+            Line2D([], [], marker="o", ls="", color=WAYPOINT, markeredgecolor="black", label="Waypoint"),
+            Line2D([], [], marker="*", ls="", color=TARGET, markeredgecolor="black",
+                   markersize=12, label="Cible courante"),
+            Line2D([], [], marker=">", ls="", color=grey, markersize=9, label="Position vraie (cap)"),
+            Line2D([], [], marker="x", ls="", color="white", markeredgewidth=2, label="Position estimée"),
+            Line2D([], [], ls="-", color=grey, label="Trajectoire parcourue"),
+            Line2D([], [], ls="--", color=grey, label="Chemin planifié"),
+        ]
+        leg1 = ax.legend(handles=symbols, title="Éléments", loc="upper left",
+                         bbox_to_anchor=(1.02, 1.0), **style)
+        leg1.get_title().set_color(TEXT)
+        ax.add_artist(leg1)
 
+        robots = [Line2D([], [], lw=4, color=self.artists[a["id"]]["color"],
+                         label=f'{a["type"]} {a["id"]}') for a in assets]
+        leg2 = ax.legend(handles=robots, title="Robots", loc="lower left",
+                         bbox_to_anchor=(1.02, 0.0), **style)
+        leg2.get_title().set_color(TEXT)
+
+    # ----------------------------------------------------------- update
     def run(self):
-        """
-        runs the matplotlib animation
-        """
-        # animation matplotlib (thread principal)
         self.ani = animation.FuncAnimation(
-            self.fig, self.update,
-            interval=int(self.dt * 1000),
-            blit=False,
-            cache_frame_data=False,
-        )
+            self.fig, self.update, interval=int(self.dt * 1000),
+            blit=False, cache_frame_data=False)
         plt.tight_layout()
         plt.show()
 
-    def update(self,_): # matplotlib calls this function with a hidden argument frame number.
-        """
-        updates the graphics
-        """
-        snap = self.get_dynamic_snapshot(0)  # Update the state of the assets
-        self.update_USVs(snap)
-        self.update_map(snap)
+    def update(self, _):
+        snap = self.get_dynamic_snapshot()
+        self.title.set_text(f"{self.scenario_name}   t = {snap['time']:.1f} s")
+        for asset in snap["assets"]:
+            self.update_asset(self.artists[asset["id"]], asset)
 
-    def update_USVs(self, snap):
-        for asset_usv_state in snap["assets_state"]:
-            x, y, psi_rad = (asset_usv_state["pose"]["x"],
-                            asset_usv_state["pose"]["y"],
-                            asset_usv_state["pose"]["psi_rad"])
-            pointe = (x, y)                                          # la pointe est sur le bateau
-            queue_fleche = (x - np.cos(psi_rad) * 2.0,      # la queue est derrière, le long du cap
-                            y - np.sin(psi_rad) * 2.0)
-            arrow = self.arrows[asset_usv_state["id"]]
-            arrow.set_position(queue_fleche)
-            arrow.xy = pointe
+    def update_asset(self, entry: dict, asset: dict):
+        truth, belief = asset["truth"]["pose"], asset["belief"]
+        entry["history"].append((truth["x"], truth["y"]))
+        trail_x, trail_y = zip(*entry["history"])
+        est = belief["estimated_pose"]
+        path = belief["path"]
+        px, py = [p["x"] for p in path], [p["y"] for p in path]
+        t = belief["ongoing_target"]
 
-    def update_map(self, snap):
-        for a in snap["assets_state"]:
-            t = a.get("ongoing_target")
-            entry = self.target_plots.get(a["id"])
-
+        for art in entry["views"]:                       # même contenu dans les deux vues
+            art["arrow"].set_position(_tail(truth))
+            art["arrow"].xy = (truth["x"], truth["y"])
+            art["trail"].set_data(trail_x, trail_y)
+            art["estimate"].set_data([est["x"]], [est["y"]])
+            art["path"].set_data(px, py)
             if t is None:
-                if entry:
-                    entry[0].set_data([], [])
-                    entry[1].set_visible(False)
-                continue
-
-            if entry is None:   # création à la volée, une seule fois par asset
-                plot, = self.ax.plot([], [], 'g*', markersize=14, zorder=3)
-                label = self.ax.annotate('', (0, 0), color='green', fontsize=8)
-                entry = self.target_plots[a["id"]] = (plot, label)
-
-            plot, label = entry
-            plot.set_data([t["x"]], [t["y"]])
-            label.set_text(f"TARGET for USV {a['id']}")
-            label.set_position((t["x"], t["y"] - 3))
-            label.set_visible(True)
+                art["target"].set_data([], [])
+                art["target_label"].set_visible(False)
+            else:
+                art["target"].set_data([t["x"]], [t["y"]])
+                art["target_label"].set_text(f'TARGET {asset["id"]}')
+                art["target_label"].set_position((t["x"], t["y"] - 3))
+                art["target_label"].set_visible(True)

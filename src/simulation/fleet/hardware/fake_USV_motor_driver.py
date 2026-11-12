@@ -8,7 +8,6 @@ class fake_USV_ardu():
         self.USV = USV
         self.cmd_left = 0
         self.cmd_right = 0
-        print(f'Init Arduino for USV {self.USV._id}...')
 
     def bound_cmd (self,cmd0:float)->float:
         """

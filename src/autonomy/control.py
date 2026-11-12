@@ -23,5 +23,4 @@ class USV_Control:
 
         Ul  = U_sum_feedforward + U_sum_feedback - U_diff_feedback
         Ur  = U_sum_feedforward + U_sum_feedback + U_diff_feedback
-
         return Ul, Ur

@@ -1,36 +1,43 @@
+import math
+
 import numpy as np
 import matplotlib.pyplot as plt
-from src.simulation.map.terrain import terrain
 
 
 
-class world_model:
+class world_grid:
     def __init__(self, terrain, precision = 1):
         self.global_precision = precision
         self.gridmap = self.build_gridmap(terrain)
         self.costmap = self.build_costmap(terrain)
 
-    def build_gridmap(self,terrain):
+    def build_gridmap(self,terrain, margin = 10):
         """
         creates the uniform gridmap with the coordinates of each cell.
         """
         x0 = terrain.bounds[0] - terrain.base_size[0]
-        x1, y0, y1 = terrain.bounds[1:]
-        X = np.arange(x0, x1, self.global_precision)
-        Y = np.arange(y0, y1, self.global_precision)
+        x1, y0, y1 = terrain.bounds[1:] 
+        X = np.arange(x0 - margin, x1 + margin, self.global_precision)
+        Y = np.arange(y0 - margin, y1 + margin, self.global_precision)
 
         map_x, map_y = np.meshgrid(X, Y[::-1]) # That way the gridmad and returns coords with X going right and Y going up
         gridmap = np.stack((map_x, map_y), axis=-1)
         return gridmap
 
-    def build_costmap(self, terrain):
+    def build_costmap(self, terrain, k=0.1): #0.5 seems ideal
         i_max, j_max, _ = np.shape(self.gridmap)
-        costmap=np.zeros((i_max, j_max))
+        costmap = np.zeros((i_max, j_max))
         for i in range(i_max):
             for j in range(j_max):
-                x, y = self.gridmap[i,j]
-                if not terrain.is_free(x, y):
-                    costmap[i,j]= 255
+                x, y = self.gridmap[i, j]
+                cost_value = min(255, 255 * math.exp(-k * terrain.distance(x, y)))
+                costmap[i, j] = cost_value
+                # if not terrain.is_free(x, y):
+                #     for ni, nj in [(i-1, j-1), (i-1, j), (i-1, j+1), (i, j-1), 
+                #                    (i, j+1), (i+1, j-1), (i+1, j), (i+1, j+1)]:
+                #         if 0 <= ni < i_max and 0 <= nj < j_max:
+                #             costmap[ni, nj] = max(costmap[ni, nj], 50)
+                #     costmap[i, j] = 255
         return costmap
 
     def get_ind_from_coord(self, x, y):
@@ -43,7 +50,7 @@ class world_model:
             return i, j
         return None
 
-    def plot_world_model(self, path=None, cost=None):
+    def plot_world_grid(self, path=None):
         gm = self.gridmap
         res = self.global_precision
         costmap = self.costmap
@@ -83,7 +90,7 @@ if __name__ == "__main__":
     terrain = Terrain()
 
     # Create world model
-    world = world_model(precision=1.0, terrain=terrain)
+    world = world_grid(precision=1.0, terrain=terrain)
 
     gridmap = world.gridmap
 

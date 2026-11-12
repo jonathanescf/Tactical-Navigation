@@ -8,16 +8,14 @@ from src.simulation.fleet.hardware.fake_IMU_driver import fake_USV_imu
 from src.autonomy.brain import USV_brain
 
 
-class USV:
-    def __init__(self, id:str, x0:float = None, y0:float = None, psi_rad0:float = 0, 
+class USV_body:
+    def __init__(self, x0:float = None, y0:float = None, psi_rad0:float = 0, 
                  terrain=None):
 
         self.usv_lock = threading.Lock()
 
         self.terrain = terrain
 
-        self._id = id
-        self._type = "USV"
         self.max_speed = 6 # m/s
         self.lenght = 2
         if x0 is not None:
@@ -31,25 +29,6 @@ class USV:
         self._Ul = 0
         self._Ur = 0
 
-        self.fake_ardu = fake_USV_ardu(USV = self)
-        self.fake_gps  = fake_USV_gps(USV = self)
-        self.fake_imu  = fake_USV_imu(USV = self)
-        
-        self.do  = USV_brain(ardu = self.fake_ardu,
-                             gps = self.fake_gps, 
-                             imu = self.fake_imu,
-                             max_speed = self.max_speed)
-
-
-    @property
-    def id(self):
-        with self.usv_lock:
-            return self._id
-
-    @property
-    def type(self):
-        with self.usv_lock:
-            return self._type
 
     @property
     def x(self):
@@ -101,6 +80,10 @@ class USV:
         with self.usv_lock:
             self._Ur = value
 
+    def get_space_state(self):
+        with self.usv_lock:
+            return self._x, self._y, self._psi_rad, self._Ul, self._Ur
+
     def physic_step(self, dt:float):
         """
         Used to update the USV state using physics equations.
@@ -120,8 +103,8 @@ class USV:
             if self.terrain.distance(x_new, y_new) < 0:
                 print("WARNING: COLLISION WITH AN OBSTACLE")
                 self._psi_rad  = (self._psi_rad + omega * dt + np.pi) % (2 * np.pi) 
-                self._x = x_new
-                self._y = y_new
+                self._x = 0
+                self._y = 0
 
             else:
                 self._x = x_new
