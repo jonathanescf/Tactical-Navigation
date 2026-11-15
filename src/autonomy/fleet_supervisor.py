@@ -14,9 +14,7 @@ class supervisor:
         x_asset, y_asset = self.brains[asset_id].current_x_y_position()
         start_ind = self.world_grid.get_ind_from_coord(x_asset, y_asset)
         goal_ind =  self.world_grid.get_ind_from_coord(*wp_goal)
-        path_ind = A_star(self.world_grid.costmap, start_ind, goal_ind)
-
-        path = [tuple(map(float, self.world_grid.gridmap[i, j])) for (i, j) in path_ind]
+        path = A_star(self.world_grid.gridmap, self.world_grid.costmap, start_ind, goal_ind)
 
         return path + [wp_goal]
 

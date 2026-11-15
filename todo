@@ -5,9 +5,12 @@ TODO LIST:
 
 - Reduire le nombre de waypoints sans reduire la precision de world grid (et donc costmap)
   (Peut etre utiliser le Recursive Shadow Casting  pour reduire le nombre de voisins a visiter?)
+  Ajuster les pids, pour eviter que le robot ait la phobie des obstacles
 - Lisser le path a l'aide des courbes de Bezier.
 - LOS sur la courbe lissee
 - Gamma value parametrization for trajectory planing by reducing crosstrack error with fictive target
+
+Things to look : Hermite spline, L1 guidance
 
 2. LOCAL PATH PLANNING
 
@@ -20,9 +23,10 @@ TODO LIST:
 - Creer une page de visualiation pour le front end qui communique en websocket avec le backend en prenant uniquement un snapshot serialise de l avancement de la simulation ainsi que la prise de decision de l autonomy.
 - Adapter l'interface pour qu'elle puisse prendre en compte les inputs de l'utilisateur (tres long terme)
 
-4. IMPROVE REAL LIFE CONDITION
+4. IMPROVE REAL LIFE CONDITIONS
 
 - Ameliorer l'equation physiques qui regissent le mouvement du robot pour qu elles incluent plus de dynamique en fonction du poids etc. avec de l inertie. Cela devrait faire apparaitre les faiblesses du controleur (a resoudre avec un meilleur algo de control -> PID etc).
+- 
 - Bruiter les driver en modelisant les defauts existants. cela devrait faire apparaitre des defauts dans la navigation (a resoudre avec des filtres -> EKF ou particle).
 
 5. DECISION LAYER
@@ -51,3 +55,14 @@ partical filter
 magnetic SLAM localization
 gravymetric
 davide faconti
+Hermite spline, L1 guidance
+
+book
+Marine Craft
+Hydrodynamics and
+Motion Control
+Vademecum de Navium Motu Contra Aquas et de Motu Gubernando
+Thor I. Fossen
+
+book
+Probabilistic Robotics

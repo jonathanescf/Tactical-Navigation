@@ -4,7 +4,7 @@ import heapq
 import matplotlib.pyplot as plt
 
 
-def A_star(cost_map:np.ndarray, start_ind:tuple, goal_ind:tuple, blocked_threshold:int = 255,  w = 0.05):
+def A_star(grid_map:np.ndarray, cost_map:np.ndarray, start_ind:tuple, goal_ind:tuple, blocked_threshold:int = 255,  w = 0.05, wp_min_dist:float  = 10) -> list[tuple] | None:
 
     # g_score: calculated path cost from start to current
     # h_score: estimated cost from current to end. euclidian distance
@@ -26,11 +26,13 @@ def A_star(cost_map:np.ndarray, start_ind:tuple, goal_ind:tuple, blocked_thresho
     parent_dict : dict[tuple, tuple]= {start_ind:None}
 
     def reconstructed_path(current_ind):
-        path = []
+        path_in_coords = []
         while current_ind is not None:
-            path.append(tuple(map(int, current_ind))) # conversion from np.int64 to int
+            if len(path_in_coords) == 0 or math.hypot(grid_map[current_ind][0]-path_in_coords[-1][0],
+                                            grid_map[current_ind][1]-path_in_coords[-1][1]) >= wp_min_dist:
+                path_in_coords.append(grid_map[current_ind])
             current_ind = parent_dict[current_ind]
-        return path[::-1]
+        return path_in_coords[::-1]
 
     while open_heap:
         f_current_score, current_ind = heapq.heappop(open_heap) # selects the lement with the lowest f_score
@@ -75,8 +77,12 @@ def A_star(cost_map:np.ndarray, start_ind:tuple, goal_ind:tuple, blocked_thresho
     #open_list is empty and no node equals goal_node: No path available.
     return None
 
-
-
+def smooth_path(path_in_coords:list[tuple], wp_min_dist:float = 0.5) -> list[tuple]:
+    """
+    Using Bezier polynoms
+    """
+    
+    
 if __name__ == "__main__": # a mettre dans un dossier test
 
     X = 255  # obstacle

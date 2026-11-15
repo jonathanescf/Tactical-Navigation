@@ -5,15 +5,53 @@ bounds = [-200, 200, -200, 200]    # x_min, x_max, y_min, y_max
 base_size = [20, 20]           # largeur, hauteur de l'encoche (m)
 
 
-# Obstacles: x, y, r (m)
-circles = []
-rectangles = [
-    # mur bas : y de -72 à -68, passage à GAUCHE (x < -120)
-    [[-120, -72], [200, -72], [200, -68], [-120, -68]],
-
-    # mur haut : y de 68 à 72, passage à DROITE (x > 120)
-    [[-200, 68], [120, 68], [120, 72], [-200, 72]],
+# Cercles : x, y, r (m)
+circles = [
+    # zone haute (au-dessus du mur A)
+    [-120, 160, 10], [-40, 150, 8], [20, 175, 12], [90, 155, 9], [150, 140, 8],
+    # entre A et B
+    [-100, 85, 9], [-50, 70, 7], [50, 95, 10], [100, 70, 8], [160, 95, 9],
+    # entre B et C (autour du piège en U)
+    [-150, 10, 10], [-90, -10, 8], [-70, 20, 6], [110, 10, 9], [160, -15, 10],
+    # entre C et D
+    [-150, -70, 9], [-60, -60, 8], [25, -80, 10], [60, -65, 7], [160, -85, 8], [170, -60, 8],
+    # zone du but (sous le mur D)
+    [-120, -160, 12], [-40, -140, 9], [30, -170, 10], [100, -135, 8], [180, -130, 7],
 ]
+
+# Rectangles : 4 sommets dans l'ordre, murs de 6 m d'épaisseur
+rectangles = [
+    # Mur A (y 120..126) : grande ouverture à DROITE (x > 60), porte de 25 m à x -30..-5
+    [[-200, 120], [-30, 120], [-30, 126], [-200, 126]],
+    [[-5, 120],   [60, 120],  [60, 126],  [-5, 126]],
+
+    # Mur B (y 40..46) : grande ouverture à GAUCHE (x < -60), porte de 25 m à x 110..135
+    [[-60, 40],  [110, 40], [110, 46], [-60, 46]],
+    [[135, 40],  [200, 40], [200, 46], [135, 46]],
+
+    # Mur C (y -40..-34) : grande ouverture à DROITE (x > 80), porte de 25 m à x -110..-85
+    [[-200, -40], [-110, -40], [-110, -34], [-200, -34]],
+    [[-85, -40],  [80, -40],   [80, -34],   [-85, -34]],
+
+    # Mur D (y -110..-104) : grande ouverture à GAUCHE (x < -80), porte de 25 m à x 60..85
+    [[-80, -110], [60, -110], [60, -104], [-80, -104]],
+    [[85, -110],  [200, -110], [200, -104], [85, -104]],
+
+    # Cloison E : sépare la zone A-B en deux salles (passage de 24 m en bas)
+    [[0, 70], [6, 70], [6, 120], [0, 120]],
+
+    # Cloison F : pend sous le mur D
+    [[-20, -104], [-14, -104], [-14, -60], [-20, -60]],
+
+    # Piège en U, ouvert vers l'amont (gauche), dos tourné vers le but
+    [[50, -15], [56, -15], [56, 15], [50, 15]],   # fond
+    [[5, 9],    [56, 9],   [56, 15], [5, 15]],    # bras haut
+    [[5, -15],  [56, -15], [56, -9], [5, -9]],    # bras bas
+
+    # Barre inclinée à 45° (test des rectangles tournés)
+    [[108, -86], [136, -58], [132, -54], [104, -82]],
+]
+
 [mission]
 type = "a_star"
 

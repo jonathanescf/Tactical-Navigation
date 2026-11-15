@@ -36,8 +36,8 @@ class software:
         self.backend_loop.start()
         
         self.graphical_interface = graphical_interface(self.parameters, 
-                                                               get_static_snapshot = self.static_snapshot,
-                                                               get_dynamic_snapshot = self.dynamic_snapshot)
+                                                       get_static_snapshot = self.static_snapshot,
+                                                       get_dynamic_snapshot = self.dynamic_snapshot)
         self.graphical_interface.run()
 
     def loop(self):
