@@ -14,11 +14,10 @@ class supervisor:
         x_asset, y_asset = self.brains[asset_id].current_x_y_position()
         start_ind = self.world_grid.get_ind_from_coord(x_asset, y_asset)
         goal_ind =  self.world_grid.get_ind_from_coord(*wp_goal)
-        path_ind = A_star(self.world_grid.costmap, start_ind, goal_ind)
+        path = A_star(self.world_grid.gridmap, self.world_grid.costmap, start_ind, goal_ind)
+        smoothed_path = smooth_path_with_hermite_spline(path, wp_min_dist=0.5)
+        return smoothed_path + [wp_goal] # couldnt fin why smoothed path doesnt include the last wp automatically
 
-        path = [tuple(map(float, self.world_grid.gridmap[i, j])) for (i, j) in path_ind]
-
-        return path + [wp_goal]
 
     def fulfill_mission(self):
 

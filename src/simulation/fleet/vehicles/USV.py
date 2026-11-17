@@ -83,32 +83,5 @@ class USV_body:
     def get_space_state(self):
         with self.usv_lock:
             return self._x, self._y, self._psi_rad, self._Ul, self._Ur
-
-    def physic_step(self, dt:float):
-        """
-        Used to update the USV state using physics equations.
-        K and L are arbitrary, further research should be conducted to make the physics more realistic
-        """
-
-        with self.usv_lock:
-            # modèle idéal : vitesse instantanée
-            K = self.max_speed / 255
-            L = 1
-            v     =  K * (self._Ul + self._Ur) / 2
-            omega = K * (self._Ur - self._Ul) / (2 * L)
-
-            x_new = self._x + v * np.cos(self._psi_rad) * dt
-            y_new = self._y + v * np.sin(self._psi_rad) * dt
-
-            if self.terrain.distance(x_new, y_new) < 0:
-                print("WARNING: COLLISION WITH AN OBSTACLE")
-                self._psi_rad  = (self._psi_rad + omega * dt + np.pi) % (2 * np.pi) 
-                self._x = 0
-                self._y = 0
-
-            else:
-                self._x = x_new
-                self._y = y_new
-                self._psi_rad  = (self._psi_rad + omega * dt) % (2 * np.pi)
             
             

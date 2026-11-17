@@ -4,7 +4,7 @@ import heapq
 import matplotlib.pyplot as plt
 
 
-def A_star(cost_map:np.ndarray, start_ind:tuple, goal_ind:tuple, blocked_threshold:int = 255,  w = 0.05):
+def A_star(grid_map:np.ndarray, cost_map:np.ndarray, start_ind:tuple, goal_ind:tuple, blocked_threshold:int = 255,  w = 0.1, wp_min_dist:float  = 10) -> list[tuple] | None:
 
     # g_score: calculated path cost from start to current
     # h_score: estimated cost from current to end. euclidian distance
@@ -26,11 +26,14 @@ def A_star(cost_map:np.ndarray, start_ind:tuple, goal_ind:tuple, blocked_thresho
     parent_dict : dict[tuple, tuple]= {start_ind:None}
 
     def reconstructed_path(current_ind):
-        path = []
+        path_in_coords = []
         while current_ind is not None:
-            path.append(tuple(map(int, current_ind))) # conversion from np.int64 to int
+            if len(path_in_coords) == 0 or math.hypot(grid_map[current_ind][0]-path_in_coords[-1][0],
+                                            grid_map[current_ind][1]-path_in_coords[-1][1]) >= wp_min_dist:
+                path_in_coords.append(grid_map[current_ind])
             current_ind = parent_dict[current_ind]
-        return path[::-1]
+        return path_in_coords[::-1]
+
 
     while open_heap:
         f_current_score, current_ind = heapq.heappop(open_heap) # selects the lement with the lowest f_score
@@ -75,8 +78,50 @@ def A_star(cost_map:np.ndarray, start_ind:tuple, goal_ind:tuple, blocked_thresho
     #open_list is empty and no node equals goal_node: No path available.
     return None
 
+def smooth_path_with_hermite_spline(path_in_coords:list[tuple], wp_min_dist:float = 0.5) -> list[tuple]:
+    """
+    Using Hermite spline method
+    """
+
+    # Generate the tangeant vectors for each waypoint
+    tangents = []
+    for i in range(len(path_in_coords)):
+        if i == 0:
+            tangent = (path_in_coords[i+1][0] - path_in_coords[i][0],
+                       path_in_coords[i+1][1] - path_in_coords[i][1])
+        elif i == len(path_in_coords)-1:
+            tangent = (path_in_coords[i][0] - path_in_coords[i-1][0],
+                       path_in_coords[i][1] - path_in_coords[i-1][1])
+        else:
+            tangent = ((path_in_coords[i+1][0] - path_in_coords[i-1][0])/2,
+                       (path_in_coords[i+1][1] - path_in_coords[i-1][1])/2)
+        tangents.append(tangent)
+
+    # Generate the smoothed path using Hermite spline interpolation
+    smoothed_path = []
+    for i in range(len(path_in_coords)-1):
+        
+        P0, P1 = path_in_coords[i], path_in_coords[i+1]
+        T0, T1 = tangents[i], tangents[i+1]
+        t_values = np.linspace(0, 1, 10) # 10 is arbitrary
+        
+        for t in t_values:
+            h00 = 2*t**3 - 3*t**2 + 1
+            h10 = t**3 - 2*t**2 + t
+            h01 = -2*t**3 + 3*t**2
+            h11 = t**3 - t**2
+
+            x = h00*P0[0] + h10*T0[0] + h01*P1[0] + h11*T1[0]
+            y = h00*P0[1] + h10*T0[1] + h01*P1[1] + h11*T1[1]
 
 
+            if len(smoothed_path) == 0 or math.hypot(x - smoothed_path[-1][0], 
+                                                     y - smoothed_path[-1][1]) >= wp_min_dist:
+                smoothed_path.append((x, y))
+
+    return smoothed_path
+    
+    
 if __name__ == "__main__": # a mettre dans un dossier test
 
     X = 255  # obstacle

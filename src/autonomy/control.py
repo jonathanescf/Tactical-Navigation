@@ -5,7 +5,7 @@ class USV_Control:
     
     def controller(self, v_real:float, psi_real_rad:float, v_desired:float, psi_desired_rad:float)->None:
         """
-        For each physic_step, this function computes a command and comunnicates it to the motors using the input.
+        For each USV_physic_step, this function computes a command and comunnicates it to the motors using the input.
         """
 
         delta_v =  v_desired - v_real
