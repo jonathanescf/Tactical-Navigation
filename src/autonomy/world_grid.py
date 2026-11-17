@@ -25,15 +25,11 @@ class world_grid:
         return gridmap
 
     def build_costmap(self, terrain, affected_distance=5): # affected distance is distance from which the cost is less the 1
-        i_max, j_max, _ = np.shape(self.gridmap)
-        costmap = np.zeros((i_max, j_max))
-        k = np.log(255)/affected_distance
-        for i in range(i_max):
-            for j in range(j_max):
-                x, y = self.gridmap[i, j]
-                cost_value = min(255, 255 * math.exp(-k * terrain.distance(x, y)))
-                costmap[i, j] = cost_value
-        return costmap
+        X = self.gridmap[..., 0] # ... is the ellipsis operator, it means that we dont care about the shape of X, we just take the first component of each value inside.
+        Y = self.gridmap[..., 1]
+        D = terrain.distance(X, Y)                       
+        k = np.log(255) / affected_distance
+        return np.minimum(255, 255 * np.exp(-k * D))
 
     def get_ind_from_coord(self, x, y):
         i_max, j_max, _ = np.shape(self.gridmap)
