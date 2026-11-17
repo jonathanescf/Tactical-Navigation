@@ -15,6 +15,7 @@ class software:
     
 
     def initialize(self, parameters:dict, path_scenario):
+        t0 = time.perf_counter()
         self.software_running = True
         self.parameters = parameters
 
@@ -22,7 +23,7 @@ class software:
         self.mission = build_mission(scenario)
         
         self.terrain = build_terrain(scenario)
-        self.world_grid = world_grid(self.terrain, precision = 10)
+        self.world_grid = world_grid(self.terrain, precision = 2.5)
         
 
         # Create instances of the main classes
@@ -38,6 +39,8 @@ class software:
         self.graphical_interface = graphical_interface(self.parameters, 
                                                        get_static_snapshot = self.static_snapshot,
                                                        get_dynamic_snapshot = self.dynamic_snapshot)
+        t1 = time.perf_counter()
+        print("time to run everything: ", round(t1-t0, 2), "s")
         self.graphical_interface.run()
 
     def loop(self):

@@ -25,8 +25,11 @@ Things to look : Hermite spline, L1 guidance
 
 4. IMPROVE REAL LIFE CONDITIONS
 
-- Ameliorer l'equation physiques qui regissent le mouvement du robot pour qu elles incluent plus de dynamique en fonction du poids etc. avec de l inertie. Cela devrait faire apparaitre les faiblesses du controleur (a resoudre avec un meilleur algo de control -> PID etc).
-- 
+- Ameliorer l'equation physiques qui regissent le mouvement du robot pour qu 
+elles incluent plus de dynamique en fonction du poids etc. avec de l inertie. 
+Cela devrait faire apparaitre les faiblesses du controleur (a resoudre avec un 
+meilleur algo de control -> PID etc). Apres un essai avec LLM, le travail est assez fastidieux pour pas grand chose. prendre le temps pour cette etape.
+
 - Bruiter les driver en modelisant les defauts existants. cela devrait faire apparaitre des defauts dans la navigation (a resoudre avec des filtres -> EKF ou particle).
 
 5. DECISION LAYER

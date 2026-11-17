@@ -22,7 +22,6 @@ class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
         self.wp_index = 0
 
     def target_reached(self):
-        print(self.wp_index)
         self.wp_index += 1
 
     def next_target(self):
@@ -42,7 +41,6 @@ class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
 
         if TargetIntercepted:
             self.target_reached()
-            print("Target reached")
         return
 
 

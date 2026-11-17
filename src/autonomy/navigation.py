@@ -3,6 +3,11 @@ from src.autonomy.utils import *
 
 
 class USV_Navigation:
+    def __init__(self):
+        self.x = None
+        self.y = None
+        self.v = None
+        self.psi = None
     def current_heading(self)->float:
         """
         Function to get the heading of the USV using the magnetometer of the IMU. The unit is in radians.
@@ -10,17 +15,6 @@ class USV_Navigation:
         mag = self.imu.read_mag_raw()
         return -np.arctan2(mag[1], mag[0])
     
-    #TODO: Implémentez un filtre de kalman sur l'imu et le gps pour estimer la vitesse du bateau
-    #TODO! major flaw: the speed should only found from the sensors. K is not supposed to be knonw.
-    def current_speed(self)->float:
-        """
-        The speed is taken from the motor command, K is given to have an exact estimate. This is ideal and should be changed.
-        """
-        K = 6 / 255
-        Ul, Ur = self.ardu.get_arduino_cmd_motor()
-        v     = K * (Ul + Ur) / 2
-        return v
-        
     def current_lat_lon_position(self)->tuple[float,float]:
         """
         Function to get the current latitude and longitude of the USV using the GPS. 
@@ -47,8 +41,22 @@ class USV_Navigation:
             x, y = None, None
         return x, y
 
+    #TODO: Implémentez un filtre de kalman sur l'imu et le gps pour estimer la vitesse du bateau
+    #TODO! major flaw: the speed should only found from the sensors. K is not supposed to be knonw.
+    def current_speed(self)->float:
+        """
+        The speed is taken from the motor command, K is given to have an exact estimate. This is ideal and should be changed.
+        """
+        K = 6 / 255
+        Ul, Ur = self.ardu.get_arduino_cmd_motor()
+        v     = K * (Ul + Ur) / 2
+        return v
+
+    def update_nav_state(self):
+        self.x, self.y = self.current_x_y_position()
+        self.v = self.current_speed()
+        self.psi = self.current_heading()
+
     def get_nav_state(self):
-        x,y = self.current_x_y_position()
-        v = self.current_speed()
-        psi = self.current_heading()
-        return x, y, psi, v
+        self.update_nav_state()
+        return self.x, self.y, self.psi, self.v

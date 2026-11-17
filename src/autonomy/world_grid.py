@@ -24,20 +24,15 @@ class world_grid:
         gridmap = np.stack((map_x, map_y), axis=-1)
         return gridmap
 
-    def build_costmap(self, terrain, k=0.1): #0.5 seems ideal
+    def build_costmap(self, terrain, affected_distance=5): # affected distance is distance from which the cost is less the 1
         i_max, j_max, _ = np.shape(self.gridmap)
         costmap = np.zeros((i_max, j_max))
+        k = np.log(255)/affected_distance
         for i in range(i_max):
             for j in range(j_max):
                 x, y = self.gridmap[i, j]
                 cost_value = min(255, 255 * math.exp(-k * terrain.distance(x, y)))
                 costmap[i, j] = cost_value
-                # if not terrain.is_free(x, y):
-                #     for ni, nj in [(i-1, j-1), (i-1, j), (i-1, j+1), (i, j-1), 
-                #                    (i, j+1), (i+1, j-1), (i+1, j), (i+1, j+1)]:
-                #         if 0 <= ni < i_max and 0 <= nj < j_max:
-                #             costmap[ni, nj] = max(costmap[ni, nj], 50)
-                #     costmap[i, j] = 255
         return costmap
 
     def get_ind_from_coord(self, x, y):
