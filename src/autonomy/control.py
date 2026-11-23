@@ -3,7 +3,7 @@ from src.autonomy.utils import *
 
 class USV_Control:
     
-    def controller(self, v_real:float, psi_real_rad:float, v_desired:float, psi_desired_rad:float)->None:
+    def controller(self, v_real:float, psi_real_rad:float, v_desired:float, psi_desired_rad:float)->None: #obsolete
         """
         For each USV_physic_step, this function computes a command and comunnicates it to the motors using the input.
         """
@@ -24,3 +24,4 @@ class USV_Control:
         Ul  = U_sum_feedforward + U_sum_feedback - U_diff_feedback
         Ur  = U_sum_feedforward + U_sum_feedback + U_diff_feedback
         return Ul, Ur
+

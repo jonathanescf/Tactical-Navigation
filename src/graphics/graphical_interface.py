@@ -8,7 +8,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-ARROW_LEN = 2.0
+ARROW_LEN = 5.0
 TRAIL_LEN = 2000
 
 BG_FIG      = "#0b1320"
@@ -18,7 +18,7 @@ OBSTACLE_ED = "#ffffff"
 WAYPOINT    = "#e0e0e0"
 TARGET      = "#ffea00"
 TEXT        = "#e6edf3"
-ASSET_COLORS = ["#00e5ff", "#ff4081", "#b388ff", "#69f0ae", "#ff9100"]
+ASSET_COLORS = ["#9a18cd", "#ff4081", "#ada2c2", "#69f0ae", "#ff9100"]
 
 # coût 0 = eau libre (même couleur que le fond), 255 = bloqué. Reste lisible quand la costmap sera graduée.
 COST_CMAP = LinearSegmentedColormap.from_list("cost", [BG_AXES, "#ffd54f", OBSTACLE])

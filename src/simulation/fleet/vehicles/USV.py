@@ -13,75 +13,56 @@ class USV_body:
                  terrain=None):
 
         self.usv_lock = threading.Lock()
-
+        self.max_speed = 6
         self.terrain = terrain
 
-        self.max_speed = 6 # m/s
-        self.lenght = 2
+
+        self.init_USV_state(x0, y0, psi_rad0)
+
+
+    def init_USV_state(self, x0, y0, psi_rad0):
+    
+        self.Ul, self.Ur = 0, 0
+        self.Tl, self. Tr = 0, 0
+
+        # absolute position in world frame in ENU
         if x0 is not None:
-            self._x = x0
-            self._y = y0
-            self._psi_rad = psi_rad0
+            self.eta = np.array([x0, y0, psi_rad0], dtype=float)
         else:
-            self._x = self.terrain.spawn[0]
-            self._y = self.terrain.spawn[1]
-            self._psi_rad = psi_rad0
-        self._Ul = 0
-        self._Ur = 0
+            self.eta = np.array([self.terrain.spawn[0],
+                                self.terrain.spawn[1],
+                                psi_rad0], dtype=float)
 
+        # In the USV body frame
+        self.nu = np.array([0, 0, 0], dtype=float) # [u, v, r]
 
-    @property
-    def x(self):
-        with self.usv_lock:
-            return self._x
-
-    @property
-    def y(self):
-        with self.usv_lock:
-            return self._y
-
-    @property
-    def psi_rad(self):
-        with self.usv_lock:
-            return self._psi_rad
-
-    @property
-    def Ul(self):
-        with self.usv_lock:
-            return self._Ul
         
     @property
-    def Ur(self):
-        with self.usv_lock:
-            return self._Ur
+    def u(self):            # u is SURGE: longitudinal speed
+        return self.nu[0] 
 
-    @x.setter
-    def x(self, value):
-        with self.usv_lock:
-            self._x = value
+    @property
+    def v(self):            # v is SWAY: lateral speed
+        return self.nu[1] 
 
-    @y.setter
-    def y(self, value):
-        with self.usv_lock:
-            self._y = value
+    @property
+    def r(self):            # r is YAW: rotaionnal speed around vertical axis
+        return self.nu[2] 
 
-    @psi_rad.setter
-    def psi_rad(self, value):
-        with self.usv_lock:
-            self._psi_rad = value
+    @property
+    def x(self):            
+        return self.eta[0] 
 
-    @Ul.setter
-    def Ul(self, value):
-        with self.usv_lock:
-            self._Ul = value
-    
-    @Ur.setter
-    def Ur(self, value):
-        with self.usv_lock:
-            self._Ur = value
+    @property
+    def y(self):            
+        return self.eta[1] 
+
+    @property
+    def psi_rad(self):   
+        return self.eta[2] 
 
     def get_space_state(self):
         with self.usv_lock:
-            return self._x, self._y, self._psi_rad, self._Ul, self._Ur
+            return self.x, self.y, self.psi_rad, self.Ul, self.Ur
             
             

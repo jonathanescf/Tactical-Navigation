@@ -23,12 +23,12 @@ class software:
         self.mission = build_mission(scenario)
         
         self.terrain = build_terrain(scenario)
-        self.world_grid = world_grid(self.terrain, precision = 2)
+        self.world_grid = world_grid(self.terrain, precision = 1)
         
 
         # Create instances of the main classes
         self.fleet = build_fleet(self.parameters, self.terrain)
-        self.simulator = simulator(self.terrain, self.fleet.bodies, self.parameters["dt"])
+        self.simulator = simulator(self.terrain, self.fleet.bodies, self.parameters)
         self.supervisor = supervisor(self.world_grid, self.fleet.brains, self.mission)
 
         
