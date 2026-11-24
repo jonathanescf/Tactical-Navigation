@@ -78,7 +78,7 @@ rectangles = [
 
 [mission]
 type = "a_star"
-arrival_radius = 2
+arrival_radius = 10
 
 waypoints = [
     [54, -198.5],

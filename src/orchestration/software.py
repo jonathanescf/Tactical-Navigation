@@ -15,7 +15,6 @@ class software:
     
 
     def initialize(self, parameters:dict, path_scenario):
-        t0 = time.perf_counter()
         self.software_running = True
         self.parameters = parameters
 
@@ -28,7 +27,7 @@ class software:
 
         # Create instances of the main classes
         self.fleet = build_fleet(self.parameters, self.terrain)
-        self.simulator = simulator(self.terrain, self.fleet.bodies, self.parameters)
+        self.simulator = simulator(self.fleet.bodies, self.parameters)
         self.supervisor = supervisor(self.world_grid, self.fleet.brains, self.mission)
 
         
@@ -39,15 +38,13 @@ class software:
         self.graphical_interface = graphical_interface(self.parameters, 
                                                        get_static_snapshot = self.static_snapshot,
                                                        get_dynamic_snapshot = self.dynamic_snapshot)
-        t1 = time.perf_counter()
-        print("time to run everything: ", round(t1-t0, 2), "s")
         self.graphical_interface.run()
 
     def loop(self):
         while self.software_running:
             ti_tick = time.perf_counter()  # Start the timer
-            self.supervisor.fulfill_mission()
             self.simulator.global_physic_step()
+            self.supervisor.fulfill_mission()
             tf_tick = time.perf_counter()  # End the timer
             time.sleep(max(0,self.parameters["dt"] - (tf_tick - ti_tick)))
 
@@ -82,26 +79,35 @@ class software:
             },
         }
 
-
     def dynamic_snapshot(self) -> dict:
         assets = []
         for asset_id, body in self.fleet.bodies.items():
             brain = self.fleet.brains[asset_id]
 
-            x, y, psi, Ul, Ur = body.get_space_state()
-            bx, by, bpsi, bv = brain.get_nav_state()
+            x, y, psi_rad, u, v, r, Ul, Ur, Tl, Tr = body.get_space_state()
+            x_hat, y_hat, psi_hat, u_hat, v_hat, r_hat = brain.get_nav_state()
+            u_des, psi_des = brain.u_des, brain.psi_des
             target = brain.ongoing_target_state
+
+            if x_hat is not None: 
+                estimated_pose = {"x": float(x_hat), "y": float(y_hat), "psi_rad": float(psi_hat)}
+            else:
+                estimated_pose = {"x": float(0), "y": float(0), "psi_rad": float(0)}
 
             assets.append({
                 "id": asset_id,
                 "type": self.fleet.dict_of_assets[asset_id].type,
                 "truth": {
-                    "pose": {"x": float(x), "y": float(y), "psi_rad": float(psi)},
+                    "pose": {"x": float(x), "y": float(y), "psi_rad": float(psi_rad)},
+                    "speed": {"u": float(u), "v": float(v), "r": float(r)},
                     "motor_commands": {"Ul": float(Ul), "Ur": float(Ur)},
+                    "Thrust": {"Tl": float(Tl), "Tr": float(Tr)},
                 },
                 "belief": {
-                    "estimated_pose": {"x": float(bx), "y": float(by), "psi_rad": float(bpsi)},
-                    "estimated_speed": float(bv),
+                    "estimated_pose": estimated_pose,
+                    "estimated_speed": {"u_hat": float(u_hat), "v_hat": float(v_hat), "r_hat": float(r_hat)},
+                    "desired_speed": float(u_des),
+                    "desired_heading": float(psi_des),
                     "ongoing_target": None if target is None
                                     else {"x": float(target[0]), "y": float(target[1])},
                     "path": [{"x": float(p[0]), "y": float(p[1])} for p in brain.waypoints],

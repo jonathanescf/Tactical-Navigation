@@ -13,7 +13,7 @@ class USV_body:
                  terrain=None):
 
         self.usv_lock = threading.Lock()
-        self.max_speed = 6
+        self.max_speed = 25.8
         self.terrain = terrain
 
 
@@ -63,6 +63,6 @@ class USV_body:
 
     def get_space_state(self):
         with self.usv_lock:
-            return self.x, self.y, self.psi_rad, self.Ul, self.Ur
+            return self.x, self.y, self.psi_rad, self.u, self.v, self.r, self.Ul, self.Ur, self.Tl, self.Tr
             
             

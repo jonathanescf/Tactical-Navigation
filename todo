@@ -1,5 +1,14 @@
+SHORT TERM TODOLIST:
 
-TODO LIST:
+1. Reglage des dependances
+2. implementer la notion de temps global et de simulation deterministe
+3. Faire un premier readme
+4. faire des tests unitaires
+5. update la gui pour v et r
+6. implementer le controleur pour la nouvelle physique (je reve mdrrr j ai trop de trucs a faire avant ca ...)
+
+
+IDEAS LIST:
 
 1. GLOBAL PATH PLANNING
 

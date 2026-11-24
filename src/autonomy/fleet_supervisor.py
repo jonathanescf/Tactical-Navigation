@@ -11,7 +11,7 @@ class supervisor:
 
 
     def generate_global_path(self, asset_id, wp_goal):
-        x_asset, y_asset = self.brains[asset_id].current_x_y_position()
+        x_asset, y_asset = self.brains[asset_id].get_position()
         start_ind = self.world_grid.get_ind_from_coord(x_asset, y_asset)
         goal_ind =  self.world_grid.get_ind_from_coord(*wp_goal)
         path = A_star(self.world_grid.gridmap, self.world_grid.costmap, start_ind, goal_ind)

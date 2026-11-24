@@ -4,6 +4,10 @@ from src.autonomy.utils import *
 
 
 class USV_Guidance:
+    def __init__(self):
+        self.u_des = 0.0
+        self.psi_des = 0.0
+        
 
     def direct_waypoints(self, x_USV:float, y_USV:float, 
                                x_target:float, y_target:float)->float:
@@ -69,10 +73,9 @@ class USV_Guidance:
         vector = np.array([x_target - x_USV, y_target - y_USV])
         desired_heading = vector_to_heading(vector)
 
-        delta_heading = desired_heading - self.current_heading()
+        delta_heading = desired_heading - self.get_heading()
 
-        desired_speed = 0.75 * self.max_speed * max(0, np.cos(delta_heading))
-
+        desired_speed = self.max_speed * max(0.25, 0.75 * np.cos(delta_heading))
         return desired_speed
 
     def get_desired_heading(self, x_USV, y_USV, 

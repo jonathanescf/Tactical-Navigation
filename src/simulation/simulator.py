@@ -1,10 +1,8 @@
-from time import time
 import numpy as np
 
 
 class simulator:
-    def __init__(self, terrain, bodies, parameters):
-        self.terrain = terrain
+    def __init__(self, bodies, parameters):
         self.bodies = bodies
         self.t = 0.0
         self.dt = parameters["dt"]
@@ -15,6 +13,9 @@ class simulator:
         self.added_u_ratio = parameters["USV_specs"]["added_u_ratio"]
         self.added_v_ratio = parameters["USV_specs"]["added_v_ratio"]
         self.added_r_ratio = parameters["USV_specs"]["added_r_ratio"]
+        self.m_u = parameters["USV_specs"]["m_u"]    
+        self.m_v = parameters["USV_specs"]["m_v"]        
+        self.m_r = parameters["USV_specs"]["m_r"]
         self.dl_u = parameters["USV_specs"]["dl_u"]
         self.dq_u = parameters["USV_specs"]["dq_u"]
         self.dl_v = parameters["USV_specs"]["dl_v"]
@@ -24,16 +25,11 @@ class simulator:
         self.u_max = parameters["USV_specs"]["u_max"]
         self.T_max = parameters["USV_specs"]["T_max"]
         self.Iz  = parameters["USV_specs"]["Iz"]   
-        self.tau_motors= 2 # in sec. rappel 3 * tau ~= 95 percent of final value
+        self.tau_motors= parameters["USV_specs"]["tau_motors"] # in sec. rappel 3 * tau ~= 95 percent of final value
 
-        # Mass/Inertia matrix ussing added mass (and Inertia)
-               
-        self.m_u = self.m * (1 + self.added_u_ratio)     
-        self.m_v = self.m * (1 + self.added_v_ratio)         
-        self.m_r = self.Iz * (1 + self.added_r_ratio)        
+        # Mass/Inertia matrix ussing added mass (and Inertia)      
         self.M = np.diag([self.m_u, self.m_v, self.m_r])
         self.M_inv = np.linalg.inv(self.M)
-
 
     def USV_physic_step(self, body, dt):
 
@@ -42,8 +38,15 @@ class simulator:
             return
 
         # Thrust matrix at each dt the new (Tl, Tr) from (Ul, Ur)
-        Tl_cmd = self.T_max * body.Ul / 255
-        Tr_cmd = self.T_max * body.Ur / 255
+        if body.Ul > 0:
+            Tl_cmd = self.T_max * body.Ul / 255
+        else: 
+            Tl_cmd = self.T_max/2 * body.Ul / 255
+
+        if body.Ur > 0:
+                    Tr_cmd = self.T_max * body.Ur / 255
+        else: 
+            Tr_cmd = self.T_max/2 * body.Ur / 255
         body.Tl = body.Tl + (Tl_cmd - body.Tl) * dt / self.tau_motors
         body.Tr = body.Tr + (Tr_cmd - body.Tr) * dt / self.tau_motors
         
@@ -85,8 +88,7 @@ class simulator:
         eta_dot = Rot_mat @ body.nu
         body.eta += eta_dot * dt
 
-
-    def USV__obsolete_physic_step(self, body, dt:float): # old and too simple
+    def USV_obsolete_physic_step(self, body, dt:float): # old and too simple
         """
         Used to update the USV state using physics equations.
         K and L are arbitrary, further research should be conducted to make the physics more realistic
@@ -96,25 +98,22 @@ class simulator:
             # modèle idéal : vitesse instantanée
             K = body.max_speed / 255
             L = 1
-            v     =  K * (body.Ul + body.Ur) / 2
+            u     =  K * (body.Ul + body.Ur) / 2
             omega = K * (body.Ur - body.Ul) / (2 * L)
 
-            x_new = body.x + v * np.cos(body.psi_rad) * dt
-            y_new = body.y + v * np.sin(body.psi_rad) * dt
+            x_new = body.x + u * np.cos(body.psi_rad) * dt
+            y_new = body.y + u * np.sin(body.psi_rad) * dt
+            psi_rad_new = (body.psi_rad + omega * dt) % (2 * np.pi)
+
+            eta_new = np.array([x_new, y_new, psi_rad_new])
 
             if body.terrain.distance(x_new, y_new) < 0:
                 print("WARNING: COLLISION WITH AN OBSTACLE")
 
             else:
-                body.x = x_new
-                body.y = y_new
-                body.psi_rad  = (body.psi_rad + omega * dt) % (2 * np.pi)
-
+                body.eta = eta_new
 
     def global_physic_step(self):
         for body in self.bodies.values():
             self.USV_physic_step(body, self.dt)
-            print(f"x={body.x:8.2f} y={body.y:8.2f} psi={np.degrees(body.psi_rad):7.2f}° | "
-                  f"u={body.u:6.3f} v={body.v:6.3f} r={body.r:6.3f} | "
-                  f"Ul={body.Ul:7.1f} Ur={body.Ur:7.1f} Tl={body.Tl:7.1f} Tr={body.Tr:7.1f}")
         self.t += self.dt

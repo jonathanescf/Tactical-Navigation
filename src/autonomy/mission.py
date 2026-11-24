@@ -24,17 +24,17 @@ class USV_Mission():
     def go_to_waypoint_step(self, nav_state, waypoint_state, 
                             interception_accuracy=0.1):
 
-        x_USV, y_USV, psi_USV, v_USV = nav_state
+        x_USV, y_USV, psi_USV, u_USV, v_USV, r_USV = nav_state
         x_waypoint, y_waypoint = waypoint_state
 
 
-        desired_speed = self.get_desired_speed(x_USV = x_USV, y_USV = y_USV, 
+        self.u_des = self.get_desired_speed(x_USV = x_USV, y_USV = y_USV, 
                                                x_target = x_waypoint, y_target = y_waypoint)
         
-        desired_heading = self.get_desired_heading(x_USV = x_USV, y_USV = y_USV, 
+        self.psi_des = self.get_desired_heading(x_USV = x_USV, y_USV = y_USV, 
                                                    x_target = x_waypoint, y_target = y_waypoint)
 
-        Ul, Ur = self.controller(v_USV, psi_USV, desired_speed, desired_heading)
+        Ul, Ur = self.controller(v_USV, psi_USV)
 
         distance_to_waypoint = np.sqrt((x_waypoint - x_USV)**2 + (y_waypoint - y_USV)**2)
 

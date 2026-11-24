@@ -11,7 +11,12 @@ from src.autonomy.mission import USV_Mission
 
 class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
     def __init__(self, ardu, gps, imu, max_speed): #no need to tell the type for dependancy purpose. 
-                                        # USV_brain just communicates with the objects given without knowing what they are
+                                                   # USV_brain just communicates with the objects given without knowing what they are
+        
+        USV_Mission.__init__(self) 
+        USV_Guidance.__init__(self) 
+        USV_Navigation.__init__(self)
+        USV_Control.__init__(self)
         self.ardu = ardu
         self.gps = gps
         self.imu = imu
