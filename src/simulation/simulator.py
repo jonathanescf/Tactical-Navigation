@@ -115,5 +115,5 @@ class simulator:
 
     def global_physic_step(self):
         for body in self.bodies.values():
-            self.USV_physic_step(body, self.dt)
+            self.USV_obsolete_physic_step(body, self.dt)
         self.t += self.dt

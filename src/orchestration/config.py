@@ -56,7 +56,7 @@ def derive_USV_specs(specs: dict) -> dict:
 
 
 parameters = {
-    "dt": 0.05,
+    "dt": 0.001,
     "dx": 0.1,
     "dy": 0.1,
     "nb_of_USVs": 1,
