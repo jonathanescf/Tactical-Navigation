@@ -1,5 +1,5 @@
 import numpy as np
-from src.autonomy.utils import *
+from src.autonomy.autonomy_utils import *
 
 
 class USV_Mission():

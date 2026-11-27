@@ -56,9 +56,12 @@ def derive_USV_specs(specs: dict) -> dict:
 
 
 parameters = {
+    "render_fps": 24,
     "dt": 0.001,
     "dx": 0.1,
     "dy": 0.1,
+    "gnss_freq": 5, 
+    "imu_freq": 20,
     "nb_of_USVs": 1,
     "USV_specs": derive_USV_specs(USV_inputs),
 }

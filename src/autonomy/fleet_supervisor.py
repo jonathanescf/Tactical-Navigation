@@ -15,11 +15,13 @@ class supervisor:
         start_ind = self.world_grid.get_ind_from_coord(x_asset, y_asset)
         goal_ind =  self.world_grid.get_ind_from_coord(*wp_goal)
         path = A_star(self.world_grid.gridmap, self.world_grid.costmap, start_ind, goal_ind)
-        smoothed_path = smooth_path_with_hermite_spline(path, wp_min_dist=0.5)
-        return smoothed_path + [wp_goal] # couldnt fin why smoothed path doesnt include the last wp automatically
+        if path is not None:
+            smoothed_path = smooth_path_with_hermite_spline(path, wp_min_dist=0.5)
+            return smoothed_path + [wp_goal] # couldnt fin why smoothed path doesnt include the last wp automatically
+        else: 
+            return []
 
-
-    def fulfill_mission(self):
+    def fulfill_mission_step(self):
 
         if self.mission_info["type"] == "go to waypoints":
 

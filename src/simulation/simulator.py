@@ -4,7 +4,6 @@ import numpy as np
 class simulator:
     def __init__(self, bodies, parameters):
         self.bodies = bodies
-        self.t = 0.0
         self.dt = parameters["dt"]
 
         self.m = parameters["USV_specs"]["m"]
@@ -116,4 +115,4 @@ class simulator:
     def global_physic_step(self):
         for body in self.bodies.values():
             self.USV_obsolete_physic_step(body, self.dt)
-        self.t += self.dt
+            # self.USV_physic_step(body, self.dt)

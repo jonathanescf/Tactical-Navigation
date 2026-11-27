@@ -17,6 +17,7 @@ IDEAS LIST:
   Ajuster les pids, pour eviter que le robot ait la phobie des obstacles
 - LOS sur la courbe lissee
 - Gamma value parametrization for trajectory planing by reducing crosstrack error with fictive target
+- A* alternatives peuvent etre une tres bonne chose: theta*, jps, J Theta*, AWJ Theta*. Faire un test avec performances neoud visite sur grille 2d peut etre coherent.
 
 Things to look : Hermite spline, L1 guidance
 

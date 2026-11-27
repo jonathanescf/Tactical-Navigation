@@ -8,46 +8,77 @@ from src.graphics.graphical_interface import graphical_interface
 from src.autonomy.world_grid import world_grid
 from src.autonomy.fleet_supervisor import supervisor
 from src.simulation.simulator import simulator
+from src.simulation.clock import clock
+
 
 class software:
-    def __init__(self, parameters:dict, path_scenario):
-        self.initialize(parameters, path_scenario)
-    
-
-    def initialize(self, parameters:dict, path_scenario):
+    def __init__(self, parameters, path_scenario, headless=False, max_ticks=None):
+        self.engine = engine(parameters, path_scenario, publish = not headless)
+        self.max_ticks = max_ticks
+        self.trace=[]
         self.software_running = True
-        self.parameters = parameters
+        if headless:
+            self.run_headless()
+        else: 
+            self.run_gui()
 
-        scenario = load_scenario(path_scenario)
-        self.mission = build_mission(scenario)
-        
-        self.terrain = build_terrain(scenario)
-        self.world_grid = world_grid(self.terrain, precision = 1)
-        
+    def run_headless(self):
+        for i in range(self.max_ticks):
+            self.engine.step()
 
-        # Create instances of the main classes
-        self.fleet = build_fleet(self.parameters, self.terrain)
-        self.simulator = simulator(self.fleet.bodies, self.parameters)
-        self.supervisor = supervisor(self.world_grid, self.fleet.brains, self.mission)
-
-        
-        # Start everything in separate threads
+    def run_gui(self):
         self.backend_loop = threading.Thread(target=self.loop, daemon=True)
+        self.graphical_interface = graphical_interface(self.engine.parameters, 
+                                                       lambda: self.engine.latest_static_snapshot,
+                                                       lambda: self.engine.latest_dynamic_snapshot)
         self.backend_loop.start()
-        
-        self.graphical_interface = graphical_interface(self.parameters, 
-                                                       get_static_snapshot = self.static_snapshot,
-                                                       get_dynamic_snapshot = self.dynamic_snapshot)
         self.graphical_interface.run()
 
     def loop(self):
+        deadline = time.monotonic()
         while self.software_running:
-            ti_tick = time.perf_counter()  # Start the timer
-            self.simulator.global_physic_step()
-            self.supervisor.fulfill_mission()
-            tf_tick = time.perf_counter()  # End the timer
-            time.sleep(max(0,self.parameters["dt"] - (tf_tick - ti_tick)))
+            self.engine.step()
+            deadline += self.engine.clock.dt
+            delay = deadline - time.monotonic()
+            time.sleep(max(0, delay))
 
+
+class engine:
+    def __init__(self, parameters, path_scenario, publish = False): 
+        self.parameters = parameters   
+        scenario = load_scenario(path_scenario)
+        self.publish = publish
+        self.latest_static_snapshot = None
+        self.latest_dynamic_snapshot = None 
+
+        # Create instances of the main classes
+        self.clock = clock(self.parameters["dt"])
+        self.terrain = build_terrain(scenario)
+        self.world_grid = world_grid(self.terrain, precision = 1)
+        self.mission = build_mission(scenario)
+        self.fleet = build_fleet(self.parameters, self.terrain)
+        self.supervisor = supervisor(self.world_grid, self.fleet.brains, self.mission)
+        self.simulator = simulator(self.fleet.bodies, self.parameters)
+
+        #initalizes all attribuites at t=0
+        self.prime()
+
+    def prime(self):
+        self.fleet.update_sensor_step(0)
+        if self.publish:
+            self.latest_static_snapshot = self.static_snapshot()
+            self.latest_dynamic_snapshot = self.dynamic_snapshot() 
+
+    def step(self):
+            self.fleet.update_sensor_step(self.clock.tick)
+            self.supervisor.fulfill_mission_step()
+            self.simulator.global_physic_step()
+            self.clock.advance()
+            self.record_trace
+            if self.publish:
+                self.latest_dynamic_snapshot = self.dynamic_snapshot() 
+            
+     
     def static_snapshot(self, grid_n: int = 250) -> dict:
         # --- Terrain : SDF échantillonnée une seule fois ---
         x0, x1, y0, y1 = self.terrain.bounds
@@ -115,6 +146,12 @@ class software:
                 },
             })
 
-        return {"time": float(self.simulator.t),
-                "dt": float(self.parameters["dt"]),
+        return {"k": float(self.clock.tick),
+                "time": float(self.clock.t),
+                "dt": float(self.clock.dt),
                 "assets": assets}
+
+    def record_trace(self):
+        for asset_id in sorted(self.fleet.bodies):
+            x, y, psi, u, v, r, Ul, Ur, Tl, Tr = self.fleet.bodies[asset_id].get_space_state()
+            self.trace.append((self.clock.tick, x, y, psi, u, v, r, Ul, Ur, Tl, Tr))

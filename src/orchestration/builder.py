@@ -1,5 +1,6 @@
 from src.autonomy.brain import USV_brain
 from src.orchestration.fleet import fleet, USV_system
+from src.orchestration.orchestration_utils import *
 
 from src.simulation.fleet.hardware.fake_IMU_driver import fake_USV_imu
 from src.simulation.fleet.hardware.fake_GPS_driver import fake_USV_gps
@@ -37,7 +38,9 @@ def build_fleet(parameters:dict, terrain):
         id = "usv" + str(num)
         type = "USV"
         body = USV_body(terrain = terrain) # here
-        gnss, imu, motor = fake_USV_gps(USV=body), fake_USV_imu(USV=body), fake_USV_ardu(USV=body)
+        div_gnss = divisor(parameters["gnss_freq"], parameters["dt"])
+        div_imu = divisor(parameters["imu_freq"], parameters["dt"])
+        gnss, imu, motor = fake_USV_gps(USV_body=body, div=div_gnss, dt=parameters["dt"]), fake_USV_imu(USV_body=body, div = div_imu, dt=parameters["dt"]), fake_USV_ardu(USV_body=body)
         brain = USV_brain(ardu=motor, gps=gnss, imu=imu, max_speed=body.max_speed)
         usv = USV_system(id=id, type=type, usv_body=body, usv_brain=brain, usv_gnss=gnss, usv_imu=imu, usv_motor=motor)
         asset_dict[id] = usv

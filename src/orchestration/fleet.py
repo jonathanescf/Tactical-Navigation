@@ -12,6 +12,14 @@ class fleet:
         self.bodies = dict((asset.id, asset.usv_body) for asset in self.dict_of_assets.values())
         self.brains = dict((asset.id, asset.usv_brain) for asset in self.dict_of_assets.values())
 
+    def update_sensor_step(self, k):
+        for system in self.dict_of_assets.values():
+            system.usv_gnss.update_gps_data(k)
+            system.usv_imu.update_imu_data(k)
+
+
+
+
 
 @dataclass
 class USV_system:

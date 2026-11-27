@@ -35,6 +35,7 @@ class USV_brain(USV_Mission, USV_Guidance, USV_Navigation, USV_Control):
         return self.waypoints[self.wp_index]
 
     def brain_step(self):
+        self.update_nav_state()
         nav_state = self.get_nav_state()
         self.ongoing_target_state = self.next_target()
         if self.ongoing_target_state is None:
