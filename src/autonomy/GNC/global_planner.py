@@ -10,12 +10,18 @@ def A_star(grid_map:np.ndarray, cost_map:np.ndarray, start_ind:tuple, goal_ind:t
     # h_score: estimated cost from current to end. euclidian distance
     # f_score: g_score + h_score
 
+    if start_ind is None or goal_ind is None:
+        print("start or goal outside the grid")
+        return None
+    start_ind, goal_ind = tuple(start_ind), tuple(goal_ind)
+
     if cost_map[start_ind] >= blocked_threshold: 
         print("start node is an obstacle")
         return None
     if cost_map[goal_ind] >= blocked_threshold: 
         print("end node is an obstacle")
         return None
+    
 
     g_score_dict : dict[tuple, float] = {start_ind:0.0}
     h_start_score = math.hypot(goal_ind[0]-start_ind[0], goal_ind[1]-start_ind[1])

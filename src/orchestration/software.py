@@ -5,7 +5,7 @@ import numpy as np
 
 from src.orchestration.builder import *
 from src.graphics.graphical_interface import graphical_interface
-from src.autonomy.world_grid import world_grid
+from src.simulation.map.terrain import discrete_terrain
 from src.autonomy.fleet_supervisor import supervisor
 from src.simulation.simulator import simulator
 from src.simulation.clock import clock
@@ -53,12 +53,17 @@ class engine:
 
         # Create instances of the main classes
         self.clock = clock(self.parameters["dt"])
-        self.terrain, self.gridmap_precision = build_terrain(scenario), 0.5
-        self.gridmap = self.terrain.discrete_terrain(precision=self.gridmap_precision)
+        self.terrain = build_terrain(scenario)
+        self.discrete_terrain = discrete_terrain(self.terrain, resolution = 0.5)
         self.mission = build_mission(scenario)
         self.fleet = build_fleet(self.parameters, self.terrain)
-        self.supervisor = supervisor(self.gridmap, self.gridmap_precision, self.fleet.brains, self.mission)
-        self.simulator = simulator(self.fleet.bodies, self.parameters)
+        self.supervisor = supervisor(self.discrete_terrain.occupancy_grid, 
+                                     self.discrete_terrain.resolution, 
+                                     self.discrete_terrain.origin, 
+                                     self.fleet.brains, 
+                                     self.mission)
+        self.simulator = simulator(self.fleet.bodies, 
+                                   self.parameters)
 
         #initalizes all attribuites at t=0
         self.prime()
@@ -89,10 +94,13 @@ class engine:
         D = self.terrain.distance(XX, YY)
 
         # --- Costmap : la grille discrète vue par le planificateur ---
-        gm = self.gridmap                # (i, j, 2), ligne 0 = haut (Y inversé)
-        res = self.gridmap_precision
-        x_left, y_top = gm[0, 0]
-        x_right, y_bottom = gm[-1, -1]
+        world = self.supervisor.processed_world
+        coords = world.coord_gridmap     # (H, W, 2) : coords[i, j] = (x, y) du centre de la cellule
+        cost = world.cost_gridmap        # (H, W) uint8 dans [0, 255]
+        res = world.low_res
+
+        x_left, y_top = coords[0, 0]
+        x_right, y_bottom = coords[-1, -1]
 
         return {
             "name": self.mission.get("name"),
@@ -102,11 +110,11 @@ class engine:
             "waypoints": [{"id": i, "x": float(x), "y": float(y)}
                         for i, (x, y) in enumerate(self.mission["waypoints"], start=1)],
             "terrain_grid": {"x": xs.tolist(), "y": ys.tolist(), "d": D.tolist()},
-            "costmap": { #TODO! changer le nom de cle: c est pas la costmap la gridmap pour l instant
+            "costmap": {
                 "res": float(res),
                 "extent": [float(x_left - res / 2), float(x_right + res / 2),
-                        float(y_bottom - res / 2), float(y_top + res / 2)],
-                "cost": self.gridmap.tolist(),    # lignes de haut en bas
+                           float(y_bottom - res / 2), float(y_top + res / 2)],
+                "cost": cost.tolist(),    # lignes de haut en bas
             },
         }
 

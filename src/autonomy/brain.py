@@ -2,7 +2,7 @@
 ### For now, a simple script is efficient, a better architecture/factorization might be needed for more complex algorithms.
 
 
-from src.autonomy.guidance.guidance import USV_Guidance
+from src.autonomy.GNC.guidance import USV_Guidance
 from src.autonomy.GNC.control import USV_Control
 from src.autonomy.GNC.navigation import USV_Navigation
 from src.autonomy.mission import USV_Mission
