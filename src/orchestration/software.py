@@ -53,11 +53,11 @@ class engine:
 
         # Create instances of the main classes
         self.clock = clock(self.parameters["dt"])
-        self.terrain = build_terrain(scenario)
-        self.world_grid = world_grid(self.terrain, precision = 1)
+        self.terrain, self.gridmap_precision = build_terrain(scenario), 0.5
+        self.gridmap = self.terrain.discrete_terrain(precision=self.gridmap_precision)
         self.mission = build_mission(scenario)
         self.fleet = build_fleet(self.parameters, self.terrain)
-        self.supervisor = supervisor(self.world_grid, self.fleet.brains, self.mission)
+        self.supervisor = supervisor(self.gridmap, self.gridmap_precision, self.fleet.brains, self.mission)
         self.simulator = simulator(self.fleet.bodies, self.parameters)
 
         #initalizes all attribuites at t=0
@@ -89,8 +89,8 @@ class engine:
         D = self.terrain.distance(XX, YY)
 
         # --- Costmap : la grille discrète vue par le planificateur ---
-        gm = self.world_grid.gridmap                 # (i, j, 2), ligne 0 = haut (Y inversé)
-        res = self.world_grid.global_precision
+        gm = self.gridmap                # (i, j, 2), ligne 0 = haut (Y inversé)
+        res = self.gridmap_precision
         x_left, y_top = gm[0, 0]
         x_right, y_bottom = gm[-1, -1]
 
@@ -102,11 +102,11 @@ class engine:
             "waypoints": [{"id": i, "x": float(x), "y": float(y)}
                         for i, (x, y) in enumerate(self.mission["waypoints"], start=1)],
             "terrain_grid": {"x": xs.tolist(), "y": ys.tolist(), "d": D.tolist()},
-            "costmap": {
+            "costmap": { #TODO! changer le nom de cle: c est pas la costmap la gridmap pour l instant
                 "res": float(res),
                 "extent": [float(x_left - res / 2), float(x_right + res / 2),
                         float(y_bottom - res / 2), float(y_top + res / 2)],
-                "cost": self.world_grid.costmap.tolist(),    # lignes de haut en bas
+                "cost": self.gridmap.tolist(),    # lignes de haut en bas
             },
         }
 

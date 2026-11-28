@@ -65,7 +65,18 @@ class terrain:
         ax.set_title("Potentiel du terrain")
         plt.show()
 
+    def discrete_terrain(self,precision = 0.5, margin = 10):
+        """
+        creates the uniform gridmap with the coordinates of each cell.
+        """
+        x0 = self.bounds[0] - self.base_size[0]
+        x1, y0, y1 = self.bounds[1:] 
+        X = np.arange(x0 - margin, x1 + margin, precision)
+        Y = np.arange(y0 - margin, y1 + margin, precision)
 
+        map_x, map_y = np.meshgrid(X, Y[::-1]) # That way the gridmad and returns coords with X going right and Y going up
+        gridmap = np.stack((map_x, map_y), axis=-1)
+        return gridmap
 
 
     

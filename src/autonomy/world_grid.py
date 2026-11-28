@@ -3,39 +3,88 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+class process_world: #TODO! finish
+    def __init__(self, discret_terrain_occupancy_grid, discrete_terrain_res, low_res):
+        self.occupancy_gridmap = discret_terrain_occupancy_grid   # outside input, we could say it comes from satelite or a aerial drone
+        self.high_res = discrete_terrain_res
+
+        self.low_res = low_res
+        self.occupancy_gridmap = self.build_occupancy_gridmap()
+        self.coord_gridmap = self.build_coord_gridmap()
+        self.cost_gridmap = self.build_costmap() 
+
+    #TODO! understand the functions !!!!!!!!!!
 
 
-class world_grid:
-    def __init__(self, terrain, precision = 1):
-        self.global_precision = precision
-        self.gridmap = self.build_gridmap(terrain)
-        self.costmap = self.build_costmap(terrain)
+    def build_occupancy_gridmap(self):
 
-    def build_gridmap(self,terrain, margin = 10):
-        """
-        creates the uniform gridmap with the coordinates of each cell.
-        """
-        x0 = terrain.bounds[0] - terrain.base_size[0]
-        x1, y0, y1 = terrain.bounds[1:] 
-        X = np.arange(x0 - margin, x1 + margin, self.global_precision)
-        Y = np.arange(y0 - margin, y1 + margin, self.global_precision)
+        factor = round(self.light_gridmap_precision / self.gridmap_precision)
 
-        map_x, map_y = np.meshgrid(X, Y[::-1]) # That way the gridmad and returns coords with X going right and Y going up
-        gridmap = np.stack((map_x, map_y), axis=-1)
-        return gridmap
+        h, w = self.gridmap.shape
+        pad_h = (-h) % factor
+        pad_w = (-w) % factor
+        padded = np.pad(self.gridmap, ((0, pad_h), (0, pad_w)),
+                        mode="constant", constant_values=0)
 
-    def build_costmap(self, terrain, affected_distance=5): # affected distance is distance from which the cost is less the 1
-        X = self.gridmap[..., 0] # ... is the ellipsis operator, it means that we dont care about the shape of X, we just take the first component of each value inside.
-        Y = self.gridmap[..., 1]
-        D = terrain.distance(X, Y)                       
-        k = np.log(255) / affected_distance
-        return np.minimum(255, 255 * np.exp(-k * D))
+        H, W = padded.shape
+        blocks = padded.reshape(H // factor, factor, W // factor, factor)
+        return blocks.max(axis=(1, 3))
 
-    def get_ind_from_coord(self, x, y):
+    def build_coord_gridmap(self):
+        pass
+
+    def build_costmap(self):
+        """Costmap uint8 construite uniquement depuis gridmap et boat_length.
+        254 : létal (obstacle ou à moins de boat_length/2 d'un obstacle)
+        253 -> 0 : décroissance exponentielle jusqu'à inflation_radius
+        0   : libre et loin de tout obstacle"""
+        p = self.gridmap_precision
+        self.lethal_radius = 2
+        self.inflation_radius = 4
+        self.decay = 0.01
+        occupied = (self.gridmap > 0).astype(np.uint8)
+        h, w = occupied.shape
+        cost = np.zeros((h, w), dtype=np.uint8)
+
+        n = int(np.ceil(self.inflation_radius / p))  # rayon d'inflation en cellules
+
+        for dy in range(-n, n + 1):
+            for dx in range(-n, n + 1):
+                d = np.hypot(dy, dx) * p
+                if d > self.inflation_radius:
+                    continue
+
+                if d <= self.lethal_radius:
+                    c = 254
+                else:
+                    c = int(253 * np.exp(-self.decay * (d - self.lethal_radius)))
+                if c == 0:
+                    continue
+
+                # Une cellule occupée en (i, j) impacte la cellule (i+dy, j+dx)
+                src = occupied[max(0, -dy):h - max(0, dy),
+                               max(0, -dx):w - max(0, dx)]
+                dst = cost[max(0, dy):h + min(0, dy),
+                           max(0, dx):w + min(0, dx)]   # vue sur cost
+                np.maximum(dst, src * np.uint8(c), out=dst)
+
+        return cost
+
+    def get_ind_from_coord_in_coord_gridmap(self, x, y):
         i_max, j_max, _ = np.shape(self.gridmap)
         x0, y0 = self.gridmap[-1, 0]
-        j = int(round((x - x0) / self.global_precision))
-        k = int(round((y - y0) / self.global_precision))
+        j = int(round((x - x0) / self.gridmap_precision))
+        k = int(round((y - y0) / self.gridmap_precision))
+        i = i_max - 1 - k # Y axis inverted wr to i (Y[::-1])
+        if 0 <= i < i_max and 0 <= j < j_max:
+            return i, j
+        return None
+
+    def get_ind_from_coord_in_light_coord_gridmap(self, x, y):
+        i_max, j_max, _ = np.shape(self.light_gridmap)
+        x0, y0 = self.gridmap[-1, 0]
+        j = int(round((x - x0) / self.light_gridmap_precision))
+        k = int(round((y - y0) / self.light_gridmap_precision))
         i = i_max - 1 - k # Y axis inverted wr to i (Y[::-1])
         if 0 <= i < i_max and 0 <= j < j_max:
             return i, j
@@ -43,7 +92,7 @@ class world_grid:
 
     def plot_world_grid(self, path=None):
         gm = self.gridmap
-        res = self.global_precision
+        res = self.gridmap_precision
         costmap = self.costmap
 
         x_left,  y_top    = gm[0, 0]
@@ -65,107 +114,69 @@ class world_grid:
         ax.set_ylabel("y [m]")
         plt.tight_layout()
         plt.show()
+
+
+
+
+
+class world_grid: #obsolete
+    def __init__(self, terrain, precision = 1):
+        self.global_precision = precision
+        self.gridmap = self.build_gridmap(terrain)
+        self.costmap = self.build_costmap(terrain)
+
+
+
+    def build_costmap(self, terrain, affected_distance=5): # affected distance is distance from which the cost is less the 1
+        X = self.gridmap[..., 0] # ... is the ellipsis operator, it means that we dont care about the shape of X, we just take the first component of each value inside.
+        Y = self.gridmap[..., 1]
+        D = terrain.distance(X, Y)                       
+        k = np.log(255) / affected_distance
+        return np.minimum(255, 255 * np.exp(-k * D))
+
+
+
+
         
 
 
 if __name__ == "__main__":
+    # --- Paramètres du test ---
+    precision = 0.5          # m / cellule (gridmap)
+    light_precision = 2.0    # m / cellule (light gridmap) -> facteur 4
+    boat_length = 4.0        # m
+    H = W = 200              # 100 m x 100 m
 
-    # Fake terrain for testing
-    class Terrain:
-        bounds = (-1, 1, 0, 3)
-        base_size = (1, 1)
+    # --- Gridmap synthétique : 0 = libre, 255 = occupé (comme une image) ---
+    raw = np.zeros((H, W), dtype=np.uint8)
+    raw[0, :] = raw[-1, :] = 255                      # bords
+    raw[:, 0] = raw[:, -1] = 255
+    raw[60:80, 40:140] = 255                          # mur horizontal
+    raw[120:160, 100:110] = 255                       # barre verticale
+    yy, xx = np.ogrid[:H, :W]
+    raw[(yy - 150) ** 2 + (xx - 50) ** 2 <= 15 ** 2] = 255   # île circulaire
 
-        def is_free(self, x, y):
-            return True
+    # --- Clip : on ramène la gridmap en binaire 0/1 ---
+    gridmap = np.clip(raw, 0, 1)
 
-    terrain = Terrain()
+    world = process_world(gridmap, precision, light_precision)
 
-    # Create world model
-    world = world_grid(precision=1.0, terrain=terrain)
+    # --- Affichage ---
+    def show(ax, grid, res, title):
+        h, w = grid.shape
+        ax.imshow(grid, extent=[0, w * res, 0, h * res], origin="upper",
+                  cmap="gray_r", vmin=0.25, vmax=1)
+        ax.set_title(f"{title}\nshape={grid.shape}, res={res} m")
+        ax.set_xlabel("x [m]")
+        ax.set_ylabel("y [m]")
+        ax.set_aspect("equal")
 
-    gridmap = world.gridmap
-
-    n_rows, n_cols, _ = gridmap.shape
-
-    print("Gridmap shape:", gridmap.shape)
-
-    # Create figure
-    fig, ax = plt.subplots(figsize=(10, 8))
-
-    # Display grid
-    ax.imshow(
-        np.zeros((n_rows, n_cols)),
-        extent=[
-            gridmap[0, 0, 0] - 0.5,
-            gridmap[0, -1, 0] + 0.5,
-            gridmap[-1, 0, 1] - 0.5,
-            gridmap[0, 0, 1] + 0.5
-        ],
-        cmap="Greys",
-        alpha=0.15
-    )
-
-    # Draw grid lines
-    for i in range(n_rows + 1):
-        ax.axhline(
-            gridmap[0, 0, 1] + 0.5 - i,
-            color="black",
-            linewidth=0.8
-        )
-
-    for j in range(n_cols + 1):
-        ax.axvline(
-            gridmap[0, 0, 0] - 0.5 + j,
-            color="black",
-            linewidth=0.8
-        )
-
-    # Display coordinates and indices in each cell
-    for i in range(n_rows):
-        for j in range(n_cols):
-
-            x = gridmap[i, j, 0]
-            y = gridmap[i, j, 1]
-
-            label = f"[{i},{j}]\n({x:.1f}, {y:.1f})"
-
-            ax.text(
-                x, y,
-                label,
-                ha="center",
-                va="center",
-                fontsize=9
-            )
-
-            # Print coordinates in terminal
-            print(f"Cell [{i},{j}] -> X = {x}, Y = {y}")
-
-    # Configure plot
-    ax.set_title("Gridmap - Cell indices and coordinates")
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-
-    ax.set_xticks(np.arange(
-        gridmap[0, 0, 0] - 0.5,
-        gridmap[0, -1, 0] + 1,
-        1
-    ))
-
-    ax.set_yticks(np.arange(
-        gridmap[-1, 0, 1] - 0.5,
-        gridmap[0, 0, 1] + 1,
-        1
-    ))
-
-    ax.set_aspect("equal")
-    ax.grid(False)
-
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    show(axes[0], world.gridmap, world.gridmap_precision, "Gridmap")
+    show(axes[1], world.light_gridmap, world.light_gridmap_precision, "Light gridmap")
+    show(axes[2], world.costmap, world.gridmap_precision,
+         f"Costmap binaire (rayon = {boat_length / 2} m)")
+    plt.tight_layout()
     plt.show()
-
-
-
-
-
-
 
         

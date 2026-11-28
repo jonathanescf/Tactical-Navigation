@@ -3,8 +3,8 @@
 
 
 from src.autonomy.guidance.guidance import USV_Guidance
-from src.autonomy.control import USV_Control
-from src.autonomy.navigation import USV_Navigation
+from src.autonomy.GNC.control import USV_Control
+from src.autonomy.GNC.navigation import USV_Navigation
 from src.autonomy.mission import USV_Mission
 
 

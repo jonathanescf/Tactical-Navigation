@@ -1,10 +1,10 @@
-from src.autonomy.guidance.global_planner import *
+from src.autonomy.GNC.global_planner import *
 
 
 
 class supervisor:
-    def __init__(self, world_grid, brains, mission_info):
-        self.world_grid = world_grid
+    def __init__(self, gridmap, gridmap_precision, brains, mission_info):
+        self.processed_world = process_world(gridmap, gridmap_precision, light_gridmap_precision = 1)
         self.mission_info = mission_info
         self.brains = brains
         self.asset_init = False
